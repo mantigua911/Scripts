@@ -1,9 +1,9 @@
 <#
 	TO-DO FOR VERSION 2.1:
-		-UPLOAD TO GITHUB AND HAVE IT RUN BY IEX
-		-HAVE IT AUTO-SELECT MSI'S  (EXCEPT CISCO)
-		- DEVELOP APP VERIFICATION (Testing phase)
-		- CREATE A DESKTOP SUPPORT (ONLY WORKS FOR LAPTOP AT THE MOMENT
+		- UPLOAD TO GITHUB AND HAVE IT RUN BY IEX (DONE?)
+		- HAVE IT AUTO-SELECT MSI'S  (EXCEPT CISCO)
+		- DEVELOP APP VERIFICATION (Currently on Testing phase)
+		- CREATE A DESKTOP SUPPORT (ONLY WORKS FOR LAPTOP AT THE MOMENT)
 		- and thats it so far :)
 		
 	Developed by Maximo Antigua
@@ -25,14 +25,19 @@ opened Admin powershell to the location of the Installer
 #>
 
 	cd \
-	cd $PSScriptRoot
+	if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript")
+ 		{ $ScriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition }
+ 	else
+ 		{ $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
+     if (!$ScriptPath){ $ScriptPath = "." } }
+	cd $ScriptPath
 
 
 ## Variables #####
 		$nameOfApps = "Dell SecureWorks Red Cloak","Mozilla Firefox (x64 en-US)", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer",  "Cisco AnyConnect Network Access Manager",  "Cisco AnyConnect Secure Mobility Client", "Cisco AnyConnect Start Before Login Module", "Adobe Acrobat Reader"
 
 	##Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
-		$source = "$PSScriptRoot\configuration.xml"
+		$source = "$ScriptPath\configuration.xml"
 		$destination = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\"
 
 	## Location of the OLD configuration files (Needs to be run after and IF cisco is installed). It finds and rename the old configuration files
@@ -69,8 +74,10 @@ function Install-Apps {
 		
 		Write-Host "Installing DUO"
 		Start-Sleep -Seconds 2
+		
+		."$ScriptPath\config.ps1"
 		# DUO #
-			$PSScriptRoot\duo-win-login-4.2.2.exe  /s /V" /qn IKEY=$configuration.iKey SKEY=$configuration.skey HOST=$configuration.API AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
+			. $ScriptPath\duo-win-login-4.2.2.exe  /S /V" /qn IKEY=$iKey SKEY=$skey HOST=$API AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 			Start-Sleep -Seconds 10
 			
 	## End of Installing Apps ##
