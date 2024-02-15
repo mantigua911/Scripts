@@ -70,7 +70,7 @@ function Install-Apps {
 		Write-Host "Installing DUO"
 		Start-Sleep -Seconds 2
 		# DUO #
-			$PSScriptRoot\duo-win-login-4.2.2.exe  /s /V" /qn IKEY="DIJZTJR8UVQCBK4B0ERT" SKEY="rG9oeH1HwiJjBkA0WWzaMczua7JncXh7TVDPP294" HOST="api-30defb94.duosecurity.com" AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
+			$PSScriptRoot\duo-win-login-4.2.2.exe  /s /V" /qn IKEY=$configuration.iKey SKEY=$configuration.skey HOST=$configuration.API AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 			Start-Sleep -Seconds 10
 			
 	## End of Installing Apps ##
