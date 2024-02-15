@@ -34,6 +34,12 @@ opened Admin powershell to the location of the Installer
 
 
 ## Variables #####
+		#Encryption key must be in the same folder as the installers. 
+		$encryptionKey = Get-Content "$ScripthPath\Encryption.key"
+		$APIencrypted = Get-Content "$ScripthPath\APIencrypted.encrypted" |ConvertTo-SecureString -Key $encryptionKey
+		$iKeyencrypted = Get-Content"$ScripthPath\iKeyencrypted.encrypted" |ConvertTo-SecureString -Key $encryptionKey
+		$sKeyencrypted = Get-Content "$ScripthPath\sKeyencrypted.encrypted" |ConvertTo-SecureString -Key $encryptionKey
+		
 		$nameOfApps = "Dell SecureWorks Red Cloak","Mozilla Firefox (x64 en-US)", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer",  "Cisco AnyConnect Network Access Manager",  "Cisco AnyConnect Secure Mobility Client", "Cisco AnyConnect Start Before Login Module", "Adobe Acrobat Reader"
 
 	##Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
@@ -51,6 +57,31 @@ opened Admin powershell to the location of the Installer
 		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi","anyconnect-win-4.10.07073-gina-predeploy-k9.msi"
 
 ## End of Variables ##
+
+## Decrypt ##
+# 1.
+$secure= $APIencrypted
+
+$tempCred=New-Object -TypeName PSCredential -ArgumentList 'temp',$secure
+
+$APIDecrypted = $tempCred.GetNetworkCredential().Password
+Remove-Variable tempCred
+#2. 
+$secure= $iKeyencrypted
+
+$tempCred=New-Object -TypeName PSCredential -ArgumentList 'temp',$secure
+
+$iKeydecrypted = $tempCred.GetNetworkCredential().Password
+Remove-Variable tempCred
+
+#3. 
+$secure= $sKeyencrypted
+
+$tempCred=New-Object -TypeName PSCredential -ArgumentList 'temp',$secure
+
+$sKeyDecrypted=$tempCred.GetNetworkCredential().Password
+Remove-Variable tempCred
+## End of Decrypt ##
 
 
 ##Functions##
