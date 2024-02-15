@@ -14,4 +14,4 @@ cd \
 $ScriptPath
 cd $ScriptPath
 
-Read-Host "Enter " -Prompt 
+Read-Host -prompt "Enter "

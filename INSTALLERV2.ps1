@@ -25,13 +25,13 @@ This sets the location to the
 opened Admin powershell to the location of the Installer
 #>
 
-	cd \
+cd \
 	if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript")
  		{ $ScriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition }
  	else
  		{ $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
      if (!$ScriptPath){ $ScriptPath = "." } }
-	cd $ScriptPath
+cd $ScriptPath
 
 
 ## Variables #####
