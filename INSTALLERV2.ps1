@@ -4,6 +4,7 @@
 		- HAVE IT AUTO-SELECT MSI'S  (EXCEPT CISCO)
 		- DEVELOP APP VERIFICATION (Currently on Testing phase)
 		- CREATE A DESKTOP SUPPORT (ONLY WORKS FOR LAPTOP AT THE MOMENT)
+		- Added Encrypted information for DUO
 		- and thats it so far :)
 		
 	Developed by Maximo Antigua
@@ -108,7 +109,7 @@ function Install-Apps {
 		
 		."$ScriptPath\config.ps1"
 		# DUO #
-			. $ScriptPath\duo-win-login-4.2.2.exe  /S /V" /qn IKEY=$iKey SKEY=$skey HOST=$API AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
+			. $ScriptPath\duo-win-login-4.2.2.exe  /S /V" /qn IKEY=$iKeyDecrypted SKEY=$sKeyDecrypted HOST=$APIDecrypted AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 			Start-Sleep -Seconds 10
 			
 	## End of Installing Apps ##
