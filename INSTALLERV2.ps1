@@ -18,7 +18,7 @@ Sets execution policy to Unrestricted for this run only.
 After the script finishes, it brings it back to how it was before.
 #>
 	
-	Set-ExecutionPolicy Unrestricted -Scope Process -Confirm:$False 
+Set-ExecutionPolicy Unrestricted -Scope Process -Confirm:$False 
 
 <#
 This sets the location to the 
@@ -37,10 +37,10 @@ cd $ScriptPath
 
 ## Variables #####
 		#Encryption key must be in the same folder as the installers. 
-		$encryptionKey = Get-Content "$ScripthPath\Encryption.key"
-		$APIencrypted = Get-Content "$ScripthPath\APIencrypted.encrypted" |ConvertTo-SecureString -Key $encryptionKey
-		$iKeyencrypted = Get-Content"$ScripthPath\iKeyencrypted.encrypted" |ConvertTo-SecureString -Key $encryptionKey
-		$sKeyencrypted = Get-Content "$ScripthPath\sKeyencrypted.encrypted" |ConvertTo-SecureString -Key $encryptionKey
+		$encryptionKey = Get-Content $ScripthPath\Encryption.key
+		$APIencrypted = Get-Content $ScripthPath\APIencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
+		$iKeyencrypted = Get-Content $ScripthPath\iKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
+		$sKeyencrypted = Get-Content $ScripthPath\sKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
 		
 		$nameOfApps = "Dell SecureWorks Red Cloak","Mozilla Firefox (x64 en-US)", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer",  "Cisco AnyConnect Network Access Manager",  "Cisco AnyConnect Secure Mobility Client", "Cisco AnyConnect Start Before Login Module", "Adobe Acrobat Reader"
 
@@ -244,7 +244,7 @@ function Verify-Integrity {
 	Write-host "Starting script...."
 	Start-Sleep -Seconds 3
 	
-	Write-Host "Welcome to Installer V2!
+	Write-Host "		Welcome to Installer V2!
 						by 9/11 IT Team"
 	
 	Start-Sleep -Seconds 2
