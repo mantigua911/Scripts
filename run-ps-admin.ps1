@@ -13,3 +13,5 @@ cd \
      if (!$ScriptPath){ $ScriptPath = "." } }
 $ScriptPath
 cd $ScriptPath
+
+Read-Host "Enter " -Prompt 
