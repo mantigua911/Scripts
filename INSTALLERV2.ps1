@@ -31,6 +31,7 @@ cd \
  	else
  		{ $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
      if (!$ScriptPath){ $ScriptPath = "." } }
+$ScriptPath
 cd $ScriptPath
 
 
