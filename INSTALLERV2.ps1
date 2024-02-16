@@ -31,21 +31,22 @@ cd \
  	else
  		{ $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
      if (!$ScriptPath){ $ScriptPath = "." } }
-$ScriptPath
+$pathToScript = $ScriptPath
 cd $ScriptPath
 
 
 ## Variables #####
 		#Encryption key must be in the same folder as the installers. 
-		$encryptionKey = Get-Content $PSScriptRoot\Encryption.key
-		$APIencrypted = Get-Content $PSScriptRoot\APIencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
-		$iKeyencrypted = Get-Content $PSScriptRoot\iKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
-		$sKeyencrypted = Get-Content $PSScriptRoot\sKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
+		$encryptionKey = Get-Content $pathToScript\Encryption.key
+		$APIencrypted = Get-Content $pathToScript\APIencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
+		$iKeyencrypted = Get-Content $pathToScript\iKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
+		$sKeyencrypted = Get-Content $pathToScript\sKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
 		
 		$nameOfApps = "Dell SecureWorks Red Cloak","Mozilla Firefox (x64 en-US)", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer",  "Cisco AnyConnect Network Access Manager",  "Cisco AnyConnect Secure Mobility Client", "Cisco AnyConnect Start Before Login Module", "Adobe Acrobat Reader"
 
 	##Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
-		$source = "$ScriptPath\configuration.xml"
+		$source = "$pathToScript\configuration.xml"
+		$source 
 		$destination = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\"
 
 	## Location of the OLD configuration files (Needs to be run after and IF cisco is installed). It finds and rename the old configuration files
@@ -68,6 +69,7 @@ $tempCred=New-Object -TypeName PSCredential -ArgumentList 'temp',$secure
 
 $APIDecrypted = $tempCred.GetNetworkCredential().Password
 Remove-Variable tempCred
+
 #2. 
 $secure= $iKeyencrypted
 
@@ -76,6 +78,7 @@ $tempCred=New-Object -TypeName PSCredential -ArgumentList 'temp',$secure
 $iKeydecrypted = $tempCred.GetNetworkCredential().Password
 Remove-Variable tempCred
 
+
 #3. 
 $secure= $sKeyencrypted
 
@@ -83,6 +86,7 @@ $tempCred=New-Object -TypeName PSCredential -ArgumentList 'temp',$secure
 
 $sKeyDecrypted=$tempCred.GetNetworkCredential().Password
 Remove-Variable tempCred
+
 ## End of Decrypt ##
 
 
@@ -271,10 +275,12 @@ do {
 			- Renames + Adds to the domain (optional), 
 			- Install Windows Updates(optional), and 
 			- Install Cisco + Configuration Profile.
+			- Verify installations (In testing phase)
 			
 		2. Express Install.
 			- Install apps and Cisco+Config file. 
 			- No Windows Updates, No Rename+Add to domain.
+			- Verify Installations (In testing phase)
 			
 		3. Individual Module Install.
 			- Prompts to either: Install Apps (not counting Cisco), 
@@ -316,6 +322,7 @@ do {
 					2 {Install-Cisco; Break}
 					3 {Get-WinUpdates; Break}
 					4 {Get-RenameAndJoingDomain; Break}
+					5 {Verify-Integrity; Break}
 					default {"----------------------------------------------------------------"}
 				}
 			}
