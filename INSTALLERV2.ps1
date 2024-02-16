@@ -102,19 +102,18 @@ function Install-Apps {
 			Write-Host "$msi installed"
 		}
 		
-		Write-Host "Installing Adobe Reader"
+		Write-Host "Attempting to install Adobe Reader"
 		Start-Sleep -Seconds 2
 		## INDIVIDUAL .EXE INSTALLERS (They require a different approach for installment, so I separated them)
 		# Adobe # 
 			Start-Process ".\Adobe.exe" -ArgumentList "/sAll /rs EULA_ACCEPT=YES" -Wait
 			Start-Sleep -Seconds 1
 		
-		Write-Host "Installing DUO"
+		Write-Host "Attempting to install DUO"
 		Start-Sleep -Seconds 2
 		
-		."$PSScriptRoot\config.ps1"
 		# DUO #
-			. $PSScriptRoot\duo-win-login-4.2.2.exe  /S /V" /qn IKEY=$iKeyDecrypted SKEY=$sKeyDecrypted HOST=$APIDecrypted AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
+		. .\duo-win-login-4.2.2.exe /S /V" /qn IKEY=$iKeyDecrypted SKEY=$sKeyDecrypted HOST=$APIDecrypted AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 			Start-Sleep -Seconds 10
 			
 	## End of Installing Apps ##

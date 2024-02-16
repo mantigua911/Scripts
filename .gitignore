@@ -4,3 +4,4 @@ Testing-Encryption.ps1
 Encryption.key
 run-ps-admin.ps1
 Get-Apps.ps1
+Test-Download-Onedrive.ps1
