@@ -37,10 +37,10 @@ cd $ScriptPath
 
 ## Variables #####
 		#Encryption key must be in the same folder as the installers. 
-		$encryptionKey = Get-Content $ScripthPath\Encryption.key
-		$APIencrypted = Get-Content $ScripthPath\APIencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
-		$iKeyencrypted = Get-Content $ScripthPath\iKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
-		$sKeyencrypted = Get-Content $ScripthPath\sKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
+		$encryptionKey = Get-Content $PSScriptRoot\Encryption.key
+		$APIencrypted = Get-Content $PSScriptRoot\APIencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
+		$iKeyencrypted = Get-Content $PSScriptRoot\iKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
+		$sKeyencrypted = Get-Content $PSScriptRoot\sKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
 		
 		$nameOfApps = "Dell SecureWorks Red Cloak","Mozilla Firefox (x64 en-US)", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer",  "Cisco AnyConnect Network Access Manager",  "Cisco AnyConnect Secure Mobility Client", "Cisco AnyConnect Start Before Login Module", "Adobe Acrobat Reader"
 
@@ -108,9 +108,9 @@ function Install-Apps {
 		Write-Host "Installing DUO"
 		Start-Sleep -Seconds 2
 		
-		."$ScriptPath\config.ps1"
+		."$PSScriptRoot\config.ps1"
 		# DUO #
-			. $ScriptPath\duo-win-login-4.2.2.exe  /S /V" /qn IKEY=$iKeyDecrypted SKEY=$sKeyDecrypted HOST=$APIDecrypted AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
+			. $PSScriptRoot\duo-win-login-4.2.2.exe  /S /V" /qn IKEY=$iKeyDecrypted SKEY=$sKeyDecrypted HOST=$APIDecrypted AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 			Start-Sleep -Seconds 10
 			
 	## End of Installing Apps ##
@@ -229,6 +229,18 @@ function Verify-Integrity {
 		}
 		Start-Sleep -Seconds 2
 	}
+
+	Write-Host "Verifying CISCO configuration files...."
+	Start-Sleep -Seconds 1
+	if( Test-Path $newPath -and Test-Path $filepath) {
+		Write-Host "Old configuration was renamed properly!"
+		Start-Sleep -Seconds 1
+		Write-Host "New configuration file was installed properly!"
+	} else {
+		Write-Host "The configuration files have not been installed for Cisco.
+		Please do it manually before restarting."
+		}
+	Start-Sleep -Seconds 1
 }
 ## END OF BASIC APP VERIFICATION ##
 
@@ -244,8 +256,8 @@ function Verify-Integrity {
 	Write-host "Starting script...."
 	Start-Sleep -Seconds 3
 	
-	Write-Host "		Welcome to Installer V2!
-						by 9/11 IT Team"
+	Write-Host "			Welcome to General Installer V2!
+			   by 9/11 IT Team"
 	
 	Start-Sleep -Seconds 2
 do {	
@@ -294,7 +306,8 @@ do {
 			2. Install-Cisco
 			3. Install-WindowsUpdates
 			4. Rename + Add to Domain
-			5. Return to Main
+			5. Verify Installations
+			6. Return to Main
 			"
 			Start-Sleep -Seconds 2
 		} while (1, 2, 3, 4, 5 -NotContains $innerAnsw)
