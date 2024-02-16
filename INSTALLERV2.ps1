@@ -254,13 +254,13 @@ function Verify-Integrity {
 ## Information ##
 
 	$computername = hostname
-	Write-Host "Current computer name $computername\n"
-	Write-Host "Location of the file $PSScriptRoot\n"
+	Write-Host "Current computer name $computername"
+	Write-Host "Location of the file $PSScriptRoot"
 	Write-host "Starting script...."
 	Start-Sleep -Seconds 3
 	
-	Write-Host "\n			Welcome to General Installer V2!
-			   by 9/11 IT Team\n"
+	Write-Host "			Welcome to General Installer V2!
+			   by 9/11 IT Team"
 	
 	Start-Sleep -Seconds 2
 do {	
