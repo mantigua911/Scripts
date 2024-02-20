@@ -138,18 +138,15 @@ function Get-RenameAndJoingDomain {
 			"Y" {	
 				Start-Sleep -Seconds 1
 				$renameComputer = Read-Host -Prompt "Enter the name of the computer:" 
-				Rename-Computer -NewName $renameComputer -Force
-				$computerinfo = hostname
-				Start-Sleep -Seconds 1
-				"The new computer name is $computerinfo"
+				Write-Host "The credentials should be DomainName\Username"
+				Start-Sleep -Seconds 2
+				$credential = Get-Credential
+				Rename-Computer -NewName $renameComputer -DomainCredential $credential
+				Start-Sleep -Seconds 2
 				Break
 				}
 			
-			default  {
-				Start-Sleep -Seconds 1
-				$computerinfo = hostname	
-				"The current name of the computer is $computerinfo"
-			}
+			default  {'----------------------------------------------------------------'}
 		}
 		#Asks to add to the domain
 		do{
@@ -162,15 +159,12 @@ function Get-RenameAndJoingDomain {
 			"Y" {
 				Start-Sleep -Seconds 1
 				ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org"
-				$computerinfo = hostname	
-				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit for this device $computerinfo"
+
+				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
 				Start-Sleep -Seconds 2
 				Break
 				}
-			default{
-				"Add to domain skipped. Cisco Anyconnect will be installed next."
-				Start-Sleep -Seconds 1
-			}
+			default{'----------------------------------------------------------------'}
 		}
 		
 	## End of Rename + Join ##
@@ -186,11 +180,14 @@ function Get-WinUpdates {
 		Write-Host "Please keep in mind there will be a prompt at the end of this requesting to restart"
 		
 		if ($ans1 -eq "Y") {
+
 			Install-Package NuGet -confirm:$false -force
 			Install-Module PSwindowsUpdate -Confirm:$false -force
 			import-module PSwindowsUpdate
-			install-WindowsUpdate -acceptall 
+			install-WindowsUpdate -AcceptAll
+
 		} else {
+
 			Write-host "Windows Updates skipped." 
 			Start-Sleep -Seconds 3
 		}
@@ -223,8 +220,10 @@ function Verify-Integrity {
 	param ()
 
 	foreach($app in $nameOfApps) {
-		$MyApp = Get-WmiObject -Class Win32_Product | sort-object Name | select Name | Where  {$_.Name -match $app}
+
+		$MyApp = Get-WmiObject -Class Win32_Product | Sort-Object Name | Select Name
 		Start-Sleep -Seconds 2
+
 		If ($MyApp -match $app) {
 			Write-Output " $MyApp.name is installed"
 		} else {
