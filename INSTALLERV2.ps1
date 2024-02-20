@@ -1,11 +1,11 @@
 <#
 	TO-DO FOR VERSION 2.1:
-		- UPLOAD TO GITHUB AND HAVE IT RUN BY IEX (DONE?)
+
 		- HAVE IT AUTO-SELECT MSI'S  (EXCEPT CISCO)
-		- DEVELOP APP VERIFICATION (Currently on Testing phase)
+		- DEVELOP APP VERIFICATION (Currently on Testing phase)(part 2)
 		- CREATE A DESKTOP SUPPORT (ONLY WORKS FOR LAPTOP AT THE MOMENT)
-		- Added Encrypted information for DUO
 		- and thats it so far :)
+		
 		
 	Developed by Maximo Antigua
 	02/13/2024 
@@ -46,7 +46,6 @@ cd $ScriptPath
 
 	##Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
 		$source = "$pathToScript\configuration.xml"
-		$source 
 		$destination = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\"
 
 	## Location of the OLD configuration files (Needs to be run after and IF cisco is installed). It finds and rename the old configuration files
@@ -221,7 +220,7 @@ function Verify-Integrity {
 
 	foreach($app in $nameOfApps) {
 
-		$MyApp = Get-WmiObject -Class Win32_Product | Sort-Object Name | Select Name
+		$MyApp = Get-WmiObject -Class Win32_Product | Sort-Object Name | Select-Object Name
 		Start-Sleep -Seconds 2
 
 		If ($MyApp -match $app) {
@@ -234,15 +233,17 @@ function Verify-Integrity {
 
 	Write-Host "Verifying CISCO configuration files...."
 	Start-Sleep -Seconds 1
-	if( Test-Path $newPath -and Test-Path $filepath) {
-		Write-Host "Old configuration was renamed properly!"
-		Start-Sleep -Seconds 1
-		Write-Host "New configuration file was installed properly!"
+
+	if( (Test-Path $newPath) -and (Test-Path $filepath)) {
+		Write-Host "Old configuration was renamed..."
+		Start-Sleep -Seconds 2
+		Write-Host "New configuration file was installed properly"
 	} else {
 		Write-Host "The configuration files have not been installed for Cisco.
 		Please do it manually before restarting."
 		}
-	Start-Sleep -Seconds 1
+
+	Start-Sleep -Seconds 2
 }
 ## END OF BASIC APP VERIFICATION ##
 
@@ -329,4 +330,6 @@ do {
 } while ($returnCode -eq 0)
 
 ## END OF PROGRAM ##
-Read-host -prompt "Finished. Please verify everything has been properly installed, and RESTART the computer"
+Read-host -prompt "Finished.
+Please verify everything has been properly installed, and 
+RESTART the computer"
