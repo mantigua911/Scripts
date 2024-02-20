@@ -67,7 +67,9 @@ $secure= $APIencrypted
 $tempCred=New-Object -TypeName PSCredential -ArgumentList 'temp',$secure
 
 $APIDecrypted = $tempCred.GetNetworkCredential().Password
+$tempCred
 Remove-Variable tempCred
+
 
 #2. 
 $secure= $iKeyencrypted
@@ -75,7 +77,9 @@ $secure= $iKeyencrypted
 $tempCred=New-Object -TypeName PSCredential -ArgumentList 'temp',$secure
 
 $iKeydecrypted = $tempCred.GetNetworkCredential().Password
+$tempCred
 Remove-Variable tempCred
+
 
 
 #3. 
@@ -84,7 +88,9 @@ $secure= $sKeyencrypted
 $tempCred=New-Object -TypeName PSCredential -ArgumentList 'temp',$secure
 
 $sKeyDecrypted=$tempCred.GetNetworkCredential().Password
+$tempCred
 Remove-Variable tempCred
+
 
 ## End of Decrypt ##
 
@@ -112,7 +118,7 @@ function Install-Apps {
 		Start-Sleep -Seconds 2
 		
 		# DUO #
-		. .\duo-win-login-4.2.2.exe /S /V" /qn IKEY=$iKeyDecrypted SKEY=$sKeyDecrypted HOST=$APIDecrypted AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
+		. .\duo-win-login-4.2.2.exe /S /V" /qn IKEY="$iKeyDecrypted" SKEY="$sKeyDecrypted" HOST="$APIDecrypted" AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 			Start-Sleep -Seconds 10
 			
 	## End of Installing Apps ##
