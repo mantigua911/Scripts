@@ -224,9 +224,9 @@ function Verify-Integrity {
 		Start-Sleep -Seconds 2
 
 		If ($MyApp -match $app) {
-			Write-Output " $MyApp.name is installed"
+			Write-Output " $app is installed"
 		} else {
-			Write-output "$MyApp.name is not installed! Please install this manually."
+			Write-output "$app is not installed! Please install this manually."
 		}
 		Start-Sleep -Seconds 2
 	}
@@ -242,7 +242,7 @@ function Verify-Integrity {
 		Write-Host "The configuration files have not been installed for Cisco.
 		Please do it manually before restarting."
 		}
-
+	Write-Host "Verification completed! Please review the previous logs "
 	Start-Sleep -Seconds 2
 }
 ## END OF BASIC APP VERIFICATION ##
@@ -306,7 +306,7 @@ do {
 			Break
 		}
 		3 {do {
-			$innerAnsw = Read-Host -Prompt "Individual modules:
+			$innerAnsw = Read-Host -Prompt "		Individual modules:
 			1. Install-apps
 			2. Install-Cisco
 			3. Install-WindowsUpdates
@@ -330,6 +330,6 @@ do {
 } while ($returnCode -eq 0)
 
 ## END OF PROGRAM ##
-Read-host -prompt "Finished.
-Please verify everything has been properly installed, and 
-RESTART the computer"
+Read-host -prompt "		Finished.
+		Please verify everything has been properly installed, and 
+		RESTART the computer"
