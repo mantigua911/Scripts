@@ -92,7 +92,7 @@ function Install-Apps {
 	 param()
 	# 1. Install Apps (Cisco gets installed last because it drops network connection once installed) 
 
-		Write-Host "Installing apps... Cisco will be installed"
+		Write-Host "Installing apps..."
 		foreach($msi in $nameOfMSI) {
 			Start-Process msiexec -ArgumentList  "/i $msi /qn " -Wait
 			Start-Sleep -Seconds 3
@@ -108,6 +108,7 @@ function Install-Apps {
 		
 		Write-Host "Attempting to install DUO"
 		Start-Sleep -Seconds 2
+
 		
 		# DUO #
 		.\duo-win-login-4.2.2.exe /S /V" /qn IKEY="$iKeyDecrypted" SKEY="$sKeyDecrypted" HOST="$APIDecrypted" AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
@@ -252,20 +253,20 @@ function Verify-Integrity {
 ## Information ##
 
 	$computername = hostname
-	Write-Host "Current computer name $computername"
-	Write-Host "Location of the file $PSScriptRoot"
-	Write-host "Starting script...."
+	Write-Host "		Current computer name $computername"
+	Write-Host "		Location of the file $PSScriptRoot"
+	Write-host "		Starting script...."
 	Start-Sleep -Seconds 3
 	
 	Write-Host "			Welcome to General Installer V2!
-			   by 9/11 IT Team"
+			    by 9/11 IT Team"
 	
 	Start-Sleep -Seconds 2
 do {	
 	$returnCode = 0
 	do {
 	$mainAns = Read-host -Prompt "
-		Please select your options (single digit integers only):
+			Please select your options (single digit integers only):
 		
 		1. Full Install.
 			- Install all the apps(in the folder), 
@@ -284,7 +285,7 @@ do {
 			- Install Cisco, Install Windows Updates(optional), 
 				or Rename(optional) + Add to domain (optional)
 		4. Exit.
-	"
+					"
 		Start-Sleep -Seconds 2
 	} while (1, 2, 3, 4 -NotContains $mainAns)
 
@@ -311,7 +312,7 @@ do {
 			4. Rename + Add to Domain
 			5. Verify Installations
 			6. Return to Main
-			"
+				"
 			Start-Sleep -Seconds 2
 		} while (1, 2, 3, 4, 5 -NotContains $innerAnsw)
 			switch($innerAnsw){
