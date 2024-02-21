@@ -230,18 +230,24 @@ function Verify-Integrity {
 		Start-Sleep -Seconds 2
 	}
 
-	Write-Host "Verifying CISCO configuration files...."
+	Write-Host "
+	Verifying CISCO configuration files...."
 	Start-Sleep -Seconds 1
 
 	if( (Test-Path $newPath) -and (Test-Path $filepath)) {
-		Write-Host "Old configuration was renamed..."
+		Write-Host "
+		Old configuration was renamed..."
 		Start-Sleep -Seconds 2
-		Write-Host "New configuration file was installed properly"
+		Write-Host "New configuration file was installed properly
+		"
 	} else {
-		Write-Host "The configuration files have not been installed for Cisco.
+		Write-Host "
+		The configuration files have not been installed for Cisco.
+
 		Please do it manually before restarting."
 		}
-	Write-Host "Verification completed! Please review the previous logs "
+	Write-Host "
+	Verification completed! Please review the previous logs "
 	Start-Sleep -Seconds 2
 }
 ## END OF BASIC APP VERIFICATION ##
@@ -253,12 +259,19 @@ function Verify-Integrity {
 ## Information ##
 
 	$computername = hostname
-	Write-Host "		Current computer name $computername"
-	Write-Host "		Location of the file $PSScriptRoot"
-	Write-host "		Starting script...."
+	Write-Host "			Current computer name $computername
+	
+	"
+	Write-Host "			Location of the file $PSScriptRoot
+	
+	"
+	Write-host "			Starting script....
+	
+	"
 	Start-Sleep -Seconds 3
 	
 	Write-Host "			Welcome to General Installer V2!
+
 			    by 9/11 IT Team"
 	
 	Start-Sleep -Seconds 2
@@ -266,7 +279,7 @@ do {
 	$returnCode = 0
 	do {
 	$mainAns = Read-host -Prompt "
-			Please select your options (single digit integers only):
+		Please select your options (single digit integers only):
 		
 		1. Full Install.
 			- Install all the apps(in the folder), 
@@ -285,7 +298,7 @@ do {
 			- Install Cisco, Install Windows Updates(optional), 
 				or Rename(optional) + Add to domain (optional)
 		4. Exit.
-					"
+							"
 		Start-Sleep -Seconds 2
 	} while (1, 2, 3, 4 -NotContains $mainAns)
 
