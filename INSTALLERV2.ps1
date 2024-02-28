@@ -95,7 +95,7 @@ function Install-Apps {
 		Write-Host "Installing apps..."
 		foreach($msi in $nameOfMSI) {
 			Start-Process msiexec -ArgumentList  "/i $msi /qn " -Wait
-			Start-Sleep -Seconds 3
+			Start-Sleep -Seconds 5
 			Write-Host "$msi installed"
 		}
 		
@@ -103,17 +103,16 @@ function Install-Apps {
 		Start-Sleep -Seconds 2
 		## INDIVIDUAL .EXE INSTALLERS (They require a different approach for installment, so I separated them)
 		# Adobe # 
-			Start-Process ".\Adobe.exe" -ArgumentList "/sAll /rs EULA_ACCEPT=YES" -Wait
-			Start-Sleep -Seconds 1
+		Start-Process ".\Adobe.exe" -ArgumentList "/sAll /rs EULA_ACCEPT=YES" -Wait
+		Start-Sleep -Seconds 2
 		
 		Write-Host "Attempting to install DUO"
 		Start-Sleep -Seconds 2
-
 		
 		# DUO #
 		.\duo-win-login-4.2.2.exe /S /V" /qn IKEY="$iKeyDecrypted" SKEY="$sKeyDecrypted" HOST="$APIDecrypted" AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 		Start-Sleep -Seconds 10
-			
+		
 	## End of Installing Apps ##
  }
  
@@ -124,6 +123,8 @@ function Get-RenameAndJoingDomain {
 		#Asks if the user wants to rename the computer
 		do{
 			$renameComputer = Read-Host -Prompt "Would you like to rename the computer?(Y/N)"
+			Write-Host "The current name of the computer is: "
+			hostname
 			Start-Sleep -Seconds 1
 			
 			$renameComputer = $renameComputer.ToUpper()
@@ -144,7 +145,7 @@ function Get-RenameAndJoingDomain {
 				Break
 				}
 			
-			default  {'----------------------------------------------------------------'}
+			default  {}
 		}
 		#Asks to add to the domain
 		do{
@@ -162,7 +163,7 @@ function Get-RenameAndJoingDomain {
 				Start-Sleep -Seconds 2
 				Break
 				}
-			default{'----------------------------------------------------------------'}
+			default{}
 		}
 		
 	## End of Rename + Join ##
@@ -210,6 +211,8 @@ function Install-Cisco {
 		
 		Copy-item -Path $source -Destination $destination
 		Start-Sleep -Seconds 2
+
+		Write-Host "Done!"
 }
 # CISCO + CONFIGURATION FILE COMPLETED #
 
@@ -259,19 +262,18 @@ function Verify-Integrity {
 ## Information ##
 
 	$computername = hostname
-	Write-Host "			Current computer name $computername
+	Write-Host "		Current computer name $computername
 	
 	"
-	Write-Host "			Location of the file $PSScriptRoot
+	Write-Host "		Location of the file $PSScriptRoot
 	
 	"
-	Write-host "			Starting script....
+	Write-host "		Starting script....
 	
 	"
 	Start-Sleep -Seconds 3
 	
-	Write-Host "			Welcome to General Installer V2!
-
+	Write-Host "		Welcome to General Installer V2!
 			    by 9/11 IT Team"
 	
 	Start-Sleep -Seconds 2
@@ -296,9 +298,9 @@ do {
 		3. Individual Module Install.
 			- Prompts to either: Install Apps (not counting Cisco), 
 			- Install Cisco, Install Windows Updates(optional), 
-				or Rename(optional) + Add to domain (optional)
+			or Rename(optional) + Add to domain (optional).
 		4. Exit.
-							"
+						"
 		Start-Sleep -Seconds 2
 	} while (1, 2, 3, 4 -NotContains $mainAns)
 
@@ -334,7 +336,7 @@ do {
 					3 {Get-WinUpdates; Break}
 					4 {Get-RenameAndJoingDomain; Break}
 					5 {Verify-Integrity; Break}
-					default {"----------------------------------------------------------------"}
+					default {}
 				}
 			}
 		default {$returnCode = 1;}
