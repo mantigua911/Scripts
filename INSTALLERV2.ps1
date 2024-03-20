@@ -253,6 +253,20 @@ function Verify-Integrity {
 	Verification completed! Please review the previous logs "
 	Start-Sleep -Seconds 2
 }
+
+function Check-Disk {
+	param ()
+	Write-Host "Starting to verify disk integrity...."
+	SFC /SCANNOW
+
+	DISM /ONLINE /CLEANUP-IMAGE /CHECKHEALTH 
+
+	DISM /ONLINE /CLEANUP-IMAGE /SCANHEALTH
+
+	DISM /ONLINE /CLEANUP-IMAGE /RESTOREHEALTH /Source:repairSource\install.wim
+
+	echo Y| CHKDSK C: /F /R /X /scan /perf 
+}
 ## END OF BASIC APP VERIFICATION ##
 
 ## END OF FUNCTIONS## #
@@ -289,6 +303,7 @@ do {
 			- Install Windows Updates(optional), and 
 			- Install Cisco + Configuration Profile.
 			- Verify installations (In testing phase)
+			- Runs SFC+DISM+CHKDSK Scan
 			
 		2. Express Install.
 			- Install apps and Cisco+Config file. 
@@ -298,7 +313,8 @@ do {
 		3. Individual Module Install.
 			- Prompts to either: Install Apps (not counting Cisco), 
 			- Install Cisco, Install Windows Updates(optional), 
-			or Rename(optional) + Add to domain (optional).
+			Rename(optional) + Add to domain (optional) or
+			- Run SFC+DISM+CHKDSK Scan
 		4. Exit.
 						"
 		Start-Sleep -Seconds 2
@@ -311,6 +327,7 @@ do {
 			Get-WinUpdates;
 			Install-Cisco;
 			Verify-Integrity;
+			Check-Disk;
 			Break
 			}
 		2 {
@@ -326,7 +343,8 @@ do {
 			3. Install-WindowsUpdates
 			4. Rename + Add to Domain
 			5. Verify Installations
-			6. Return to Main
+			6. SFC+DISM+CHKDSK Scan
+			7. Return to Main
 				"
 			Start-Sleep -Seconds 2
 		} while (1, 2, 3, 4, 5 -NotContains $innerAnsw)
@@ -336,6 +354,7 @@ do {
 					3 {Get-WinUpdates; Break}
 					4 {Get-RenameAndJoingDomain; Break}
 					5 {Verify-Integrity; Break}
+					6 {Check-Disk; Break}
 					default {}
 				}
 			}
