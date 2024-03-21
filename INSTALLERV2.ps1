@@ -126,7 +126,7 @@ function Get-RenameAndJoingDomain {
 		#Asks if the user wants to rename the computer
 		do{
 			$renameComputer = Read-Host -Prompt "Would you like to rename the computer?(Y/N)"
-			Write-Host "The current name of the computer is: "
+			Write-Host "The current name of the computer is "
 			hostname
 			Start-Sleep -Seconds 1
 			
@@ -139,7 +139,7 @@ function Get-RenameAndJoingDomain {
 			
 			"Y" {	
 				Start-Sleep -Seconds 1
-				$renameComputer = Read-Host -Prompt "Enter the name of the computer:" 
+				$renameComputer = Read-Host -Prompt "Enter the name of the computer" 
 				Start-Sleep -Seconds 2
 				Rename-Computer -NewName $renameComputer -DomainCredential $credential
 				Start-Sleep -Seconds 2
@@ -158,7 +158,7 @@ function Get-RenameAndJoingDomain {
 		switch ($addDomainAns) {
 			"Y" {
 				Start-Sleep -Seconds 1
-				ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org"
+				ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org" -LocalCredential $credential
 				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
 				Start-Sleep -Seconds 2
 				Break
