@@ -57,7 +57,10 @@ cd $ScriptPath
 
 	## Cisco MSI Installations
 		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi","anyconnect-win-4.10.07073-gina-predeploy-k9.msi"
-
+	## Get Credentials
+			Write-Host "Please input your admin credentials, these will be stored in a variable for use."
+			Write-Host "The credentials should be DomainName\Username"
+			$credential = Get-Credential
 ## End of Variables ##
 
 ## Decrypt ##
@@ -137,9 +140,7 @@ function Get-RenameAndJoingDomain {
 			"Y" {	
 				Start-Sleep -Seconds 1
 				$renameComputer = Read-Host -Prompt "Enter the name of the computer:" 
-				Write-Host "The credentials should be DomainName\Username"
 				Start-Sleep -Seconds 2
-				$credential = Get-Credential
 				Rename-Computer -NewName $renameComputer -DomainCredential $credential
 				Start-Sleep -Seconds 2
 				Break
@@ -158,7 +159,6 @@ function Get-RenameAndJoingDomain {
 			"Y" {
 				Start-Sleep -Seconds 1
 				ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org"
-
 				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
 				Start-Sleep -Seconds 2
 				Break
@@ -276,18 +276,18 @@ function Check-Disk {
 ## Information ##
 
 	$computername = hostname
-	Write-Host "		Current computer name $computername
+	Write-Host "	Current computer name $computername
 	
 	"
-	Write-Host "		Location of the file $PSScriptRoot
+	Write-Host "	Location of the file $PSScriptRoot
 	
 	"
-	Write-host "		Starting script....
+	Write-host "	Starting script....
 	
 	"
 	Start-Sleep -Seconds 3
 	
-	Write-Host "		Welcome to General Installer V2!
+	Write-Host "	Welcome to General Installer V2!
 			    by 9/11 IT Team"
 	
 	Start-Sleep -Seconds 2
@@ -337,7 +337,7 @@ do {
 			Break
 		}
 		3 {do {
-			$innerAnsw = Read-Host -Prompt "		Individual modules:
+			$innerAnsw = Read-Host -Prompt "	Individual modules:
 			1. Install-apps
 			2. Install-Cisco
 			3. Install-WindowsUpdates
