@@ -158,7 +158,7 @@ function Get-RenameAndJoingDomain {
 		switch ($addDomainAns) {
 			"Y" {
 				Start-Sleep -Seconds 1
-				ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org" -LocalCredential $credential
+				ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -Credential $credential -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org"
 				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
 				Start-Sleep -Seconds 2
 				Break
