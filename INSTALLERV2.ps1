@@ -58,8 +58,8 @@ cd $ScriptPath
 	## Cisco MSI Installations
 		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi","anyconnect-win-4.10.07073-gina-predeploy-k9.msi"
 	## Get Credentials
-			Write-Host "Please input your admin credentials, these will be stored in a variable for use."
-			Write-Host "The credentials should be DomainName\Username"
+			Write-Host "Please input your AD Admin credentials, these will be stored in a variable for use."
+			Write-Host "The credentials should be DomainName\Username `n"
 			$credential = Get-Credential
 ## End of Variables ##
 
@@ -101,20 +101,18 @@ function Install-Apps {
 			Start-Sleep -Seconds 5
 			Write-Host "$msi installed"
 		}
-		
+		## INDIVIDUAL .EXE INSTALLERS (They require a different approach for installment, so I separated them) - MAX
 		Write-Host "Attempting to install Adobe Reader"
 		Start-Sleep -Seconds 2
-		## INDIVIDUAL .EXE INSTALLERS (They require a different approach for installment, so I separated them)
 		# Adobe # 
 		Start-Process ".\Adobe.exe" -ArgumentList "/sAll /rs EULA_ACCEPT=YES" -Wait
 		Start-Sleep -Seconds 2
 		
 		Write-Host "Attempting to install DUO"
 		Start-Sleep -Seconds 2
-		
 		# DUO #
 		.\duo-win-login-4.2.2.exe /S /V" /qn IKEY="$iKeyDecrypted" SKEY="$sKeyDecrypted" HOST="$APIDecrypted" AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
-		Start-Sleep -Seconds 10
+		Start-Sleep -Seconds 5
 		
 	## End of Installing Apps ##
  }
@@ -140,7 +138,8 @@ function Get-RenameAndJoingDomain {
 			"Y" {	
 				Start-Sleep -Seconds 1
 				$renameComputer = Read-Host -Prompt "Enter the name of the computer" 
-				Start-Sleep -Seconds 2
+				Write-Host "Please enter the local admin login"
+				Start-Sleep -Seconds 3
 				Rename-Computer -NewName $renameComputer -DomainCredential $credential
 				Start-Sleep -Seconds 2
 				Break
@@ -157,8 +156,9 @@ function Get-RenameAndJoingDomain {
 		
 		switch ($addDomainAns) {
 			"Y" {
-				Start-Sleep -Seconds 1
-				ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -Credential $credential -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org"
+				Write-Host "Please enter your AD Admin credentials"
+				Start-Sleep -Seconds 2
+				ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org"
 				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
 				Start-Sleep -Seconds 2
 				Break
@@ -176,14 +176,13 @@ function Get-WinUpdates {
 		$ans1 = Read-Host -Prompt "Would you like to install Windows Updates? (This can take more than 30 minutes)[Y/N]"
 		$ans1 = $ans1.toUpper()
 		Start-Sleep -Seconds 2
-		Write-Host "Please keep in mind there will be a prompt at the end of this requesting to restart"
 		
 		if ($ans1 -eq "Y") {
 
 			Install-Package NuGet -confirm:$false -force
 			Install-Module PSwindowsUpdate -Confirm:$false -force
 			import-module PSwindowsUpdate
-			install-WindowsUpdate -AcceptAll
+			install-WindowsUpdate -AcceptAll -IgnoreReboot
 
 		} else {
 
@@ -226,37 +225,37 @@ function Verify-Integrity {
 		Start-Sleep -Seconds 2
 
 		If ($MyApp -match $app) {
-			Write-Output " $app is installed"
+			Write-Output " $app is installed `n"
 		} else {
-			Write-output "$app is not installed! Please install this manually."
+			Write-output "$app is not installed! Please install this manually. `n"
 		}
 		Start-Sleep -Seconds 2
 	}
 
 	Write-Host "
-	Verifying CISCO configuration files...."
+	Verifying CISCO configuration files.... `n"
 	Start-Sleep -Seconds 1
 
 	if( (Test-Path $newPath) -and (Test-Path $filepath)) {
 		Write-Host "
-		Old configuration was renamed..."
+		Old configuration was renamed... `n"
 		Start-Sleep -Seconds 2
-		Write-Host "New configuration file was installed properly
-		"
+		Write-Host "New configuration file was installed properly `n"
 	} else {
 		Write-Host "
 		The configuration files have not been installed for Cisco.
 
-		Please do it manually before restarting."
+		Please do it manually before restarting. `n"
 		}
-	Write-Host "
-	Verification completed! Please review the previous logs "
+	Write-Host "Verification completed! Please review the previous logs `n"
 	Start-Sleep -Seconds 2
 }
+## END OF BASIC APP VERIFICATION ##
 
+## CHK DSK + DISM + SFC ##
 function Check-Disk {
 	param ()
-	Write-Host "Starting to verify disk integrity...."
+	Write-Host "Starting to verify E: Disk integrity.... `n "
 	SFC /SCANNOW
 
 	DISM /ONLINE /CLEANUP-IMAGE /CHECKHEALTH 
@@ -267,7 +266,6 @@ function Check-Disk {
 
 	echo Y| CHKDSK C: /F /R /X /scan /perf 
 }
-## END OF BASIC APP VERIFICATION ##
 
 ## END OF FUNCTIONS## #
 
@@ -275,22 +273,13 @@ function Check-Disk {
 
 ## Information ##
 
-	$computername = hostname
-	Write-Host "	Current computer name $computername
-	
-	"
-	Write-Host "	Location of the file $PSScriptRoot
-	
-	"
-	Write-host "	Starting script....
-	
-	"
+	Write-Host "****Location of the file $PSScriptRoot****"
+	Write-host "****Starting script....****"
 	Start-Sleep -Seconds 3
 	
-	Write-Host "	Welcome to General Installer V2!
-			    by 9/11 IT Team"
-	
+	Write-Host "****Welcome to General InstallerV2 by the 9/11 IT Team****"
 	Start-Sleep -Seconds 2
+
 do {	
 	$returnCode = 0
 	do {
@@ -347,7 +336,7 @@ do {
 			7. Return to Main
 				"
 			Start-Sleep -Seconds 2
-		} while (1, 2, 3, 4, 5 -NotContains $innerAnsw)
+		} while (1, 2, 3, 4, 5, 6, 7 -NotContains $innerAnsw)
 			switch($innerAnsw){
 					1 {Install-Apps; Break}
 					2 {Install-Cisco; Break}
@@ -355,7 +344,7 @@ do {
 					4 {Get-RenameAndJoingDomain; Break}
 					5 {Verify-Integrity; Break}
 					6 {Check-Disk; Break}
-					default {}
+					default {"*blerp*"}
 				}
 			}
 		default {$returnCode = 1;}
@@ -363,6 +352,7 @@ do {
 } while ($returnCode -eq 0)
 
 ## END OF PROGRAM ##
-Read-host -prompt "		Finished.
-		Please verify everything has been properly installed, and 
-		RESTART the computer"
+
+Read-Host "Done. The computer will restart 20 seconds after this message."
+Start-Sleep -Seconds 20
+Restart-Computer -Force
