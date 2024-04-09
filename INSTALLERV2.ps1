@@ -57,10 +57,6 @@ cd $ScriptPath
 
 	## Cisco MSI Installations
 		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi","anyconnect-win-4.10.07073-gina-predeploy-k9.msi"
-	## Get Credentials
-			Write-Host "Please input your AD Admin credentials, these will be stored in a variable for use."
-			Write-Host "The credentials should be DomainName\Username `n"
-			$credential = Get-Credential
 ## End of Variables ##
 
 ## Decrypt ##
