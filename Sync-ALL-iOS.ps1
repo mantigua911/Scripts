@@ -20,7 +20,7 @@ if ($ans.toUpper() -eq "B")
 	Write-Host "The last number being currently used is $($DevicesToSync.DeviceName[-1])"
 	Start-Sleep -Seconds 2
 
-	$start = Read-Host "AG number to being at"
+	$start = Read-Host "AG number to beginning at"
 	$end = Read-Host "AG number to end at"
 
 	Foreach ($Device in $DevicesToSync)
