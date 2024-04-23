@@ -3,7 +3,6 @@
 
 		- HAVE IT AUTO-SELECT MSI'S  (EXCEPT CISCO)
 		- DEVELOP APP VERIFICATION (Currently on Testing phase)(part 2)
-		- CREATE A DESKTOP SUPPORT (ONLY WORKS FOR LAPTOP AT THE MOMENT)
 		- and thats it so far :)
 		
 		
@@ -34,7 +33,6 @@ cd \
 $pathToScript = $ScriptPath
 cd $ScriptPath
 
-
 ## Variables #####
 		#Encryption key must be in the same folder as the installers. 
 		$encryptionKey = Get-Content $pathToScript\Encryption.key
@@ -44,10 +42,6 @@ cd $ScriptPath
 		
 		$nameOfApps = "Dell SecureWorks Red Cloak","Mozilla Firefox (x64 en-US)", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer",  "Cisco AnyConnect Network Access Manager",  "Cisco AnyConnect Secure Mobility Client", "Cisco AnyConnect Start Before Login Module", "Adobe Acrobat Reader"
 
-	##Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
-		$source = "$pathToScript\configuration.xml"
-		$destination = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\"
-
 	## Location of the OLD configuration files (Needs to be run after and IF cisco is installed). It finds and rename the old configuration files
 		$filePath = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration.xml"
 		$newPath = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_OLD.xml"
@@ -55,8 +49,26 @@ cd $ScriptPath
 	## MSI names (THIS CAN BE MODIFIED AND ADD ANY MSI NAMES YOU WOULD LIKE)
 		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "redcloak.msi", "Firefox_Setup_115.0.2.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi"
 
-	## Cisco MSI Installations
+	##Cisco MSI Installations (LAPTOPS AND DESKTOPS)
+	## Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
+	function Test-IsLaptop {
+		$HardwareType = (Get-WmiObject -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
+		# https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-computersystem
+		# Mobile = 2
+		# Desktop = 1
+		$HardwareType -eq 2
+	}
+
+	if(Test-IsLaptop){
 		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi","anyconnect-win-4.10.07073-gina-predeploy-k9.msi"
+		$source = "$pathToScript\configuration_Laptop.xml"
+		Write-Host "THIS IS A LAPTOP"
+	} else {
+		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi"
+		$source = "$pathToScript\configuration_desktop.xml"
+		Write-Host "THIS IS A DESKTOP"
+	}
+	$destination = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\"
 ## End of Variables ##
 
 ## Decrypt ##
@@ -347,8 +359,13 @@ do {
 	}
 } while ($returnCode -eq 0)
 
-## END OF PROGRAM ##
+$ans = Read-Host -Prompt "Would you like to restart this device?(Y/N)"
+if ($ans.ToUpper() -eq "Y"){
+	Write-Host "Done. The computer will restart 5 seconds after this message."
+	Start-Sleep -Seconds 5
+	Restart-Computer -Force
+} else {
+	Read-Host "Boooring =("
+}
 
-Read-Host "Done. The computer will restart 20 seconds after this message."
-Start-Sleep -Seconds 20
-Restart-Computer -Force
+## END OF PROGRAM ##
