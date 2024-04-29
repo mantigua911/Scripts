@@ -9,8 +9,8 @@ if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 Connect-MSGraph -AdminConsent
 Write-Host "Pulling Audio Guide information. Please wait...`n" 
 
-$DevicesToRestart = Get-IntuneManagedDevice | Get-MSGraphAllPages | where-object {($_.managementAgent -eq 'mdm' ) -and ($_.DeviceName -Like "VSAG*")}
-Write-Host "The last number being currently used is $($DevicesToRestart.DeviceName[-1])"
+$DevicesToRestart = Get-IntuneManagedDevice | Get-MSGraphAllPages | where-object {($_.DeviceName -Like "VSAG*")}
+
 Write-Host "Would you like to do it in BATCHES, ALL devices, or for a SINGLE device?(B for Batches/A for All/S for Single)"
 $ans = Read-Host
 Start-Sleep -Seconds 3
