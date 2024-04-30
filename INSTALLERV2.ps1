@@ -2,7 +2,7 @@
 	TO-DO FOR VERSION 2.1:
 
 		- HAVE IT AUTO-SELECT MSI'S  (EXCEPT CISCO)
-		- DEVELOP APP VERIFICATION (Currently on Testing phase)(part 2)
+		- DEVELOP APP VERIFICATION (Currently on Testing phase) (still cant get it to recognize Firefox when its installed)
 		- and thats it so far :)
 		
 		
