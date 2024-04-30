@@ -11,7 +11,6 @@
 	Feel free to add any modifications
 
 #>											  
-
 <#
 Sets execution policy to Unrestricted for this run only. 
 After the script finishes, it brings it back to how it was before.
