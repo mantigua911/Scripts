@@ -62,10 +62,12 @@ cd $ScriptPath
 		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi","anyconnect-win-4.10.07073-gina-predeploy-k9.msi"
 		$source = "$pathToScript\configuration_Laptop.xml"
 		Write-Host "THIS IS A LAPTOP"
+		$rerename = Rename-Item -Path "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_Laptop.xml" -NewName  $filePath
 	} else {
 		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi"
 		$source = "$pathToScript\configuration_desktop.xml"
 		Write-Host "THIS IS A DESKTOP"
+		$rerename = Rename-Item -Path "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_desktop.xml" -NewName  $filePath
 	}
 	$destination = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\"
 ## End of Variables ##
@@ -217,7 +219,9 @@ function Install-Cisco {
 		
 		Copy-item -Path $source -Destination $destination
 		Start-Sleep -Seconds 2
-
+		Rename-Item -Path $ -NewName  $filePath
+		$rerename
+		
 		Write-Host "Done!"
 }
 # CISCO + CONFIGURATION FILE COMPLETED #
