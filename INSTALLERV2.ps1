@@ -219,7 +219,6 @@ function Install-Cisco {
 		
 		Copy-item -Path $source -Destination $destination
 		Start-Sleep -Seconds 2
-		Rename-Item -Path $ -NewName  $filePath
 		$rerename
 		
 		Write-Host "Done!"
