@@ -62,12 +62,11 @@ cd $ScriptPath
 		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi","anyconnect-win-4.10.07073-gina-predeploy-k9.msi"
 		$source = "$pathToScript\configuration_Laptop.xml"
 		Write-Host "THIS IS A LAPTOP"
-		$rerename = Rename-Item -Path "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_Laptop.xml" -NewName  $filePath
+
 	} else {
 		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi"
 		$source = "$pathToScript\configuration_desktop.xml"
-		Write-Host "THIS IS A DESKTOP"
-		$rerename = Rename-Item -Path "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_desktop.xml" -NewName  $filePath
+		Write-Host "THIS IS A DESKTOP" 
 	}
 	$destination = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\"
 ## End of Variables ##
@@ -167,7 +166,12 @@ function Get-RenameAndJoingDomain {
 			"Y" {
 				Write-Host "Please enter your AD Admin credentials"
 				Start-Sleep -Seconds 2
-				ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org"
+				if (Test-IsLaptop){
+					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org"
+				} else {
+					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Computers,DC=Sept11mm, DC=org"
+				}
+				
 				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
 				Start-Sleep -Seconds 2
 				Break
@@ -213,13 +217,15 @@ function Install-Cisco {
 		Write-host "Renaming current configuration file to configuration_OLD"
 		Rename-Item -Path $filePath -NewName  $newPath
 		
-		Start-Sleep -Seconds 2
-		
 		Write-Host "Copying the Unrestricted configuration to the Proper location"
-		
-		Copy-item -Path $source -Destination $destination
 		Start-Sleep -Seconds 2
-		$rerename
+		Copy-item -Path $source -Destination $destination
+
+		if (Test-IsLaptop){
+			Rename-Item -Path "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_Laptop.xml" -NewName  $filePath
+		} else {
+			Rename-Item -Path "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_desktop.xml" -NewName  $filePath
+		}
 		
 		Write-Host "Done!"
 }
