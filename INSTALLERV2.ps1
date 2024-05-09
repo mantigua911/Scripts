@@ -148,7 +148,7 @@ function Get-RenameAndJoingDomain {
 				$renameComputer = Read-Host -Prompt "Enter the name of the computer" 
 				Write-Host "Please enter the local admin login"
 				Start-Sleep -Seconds 3
-				Rename-Computer -NewName $renameComputer
+				Rename-Computer -NewName $renameComputer -LocalCredential $env:COMPUTERNAME\
 				Start-Sleep -Seconds 2
 				Break
 				}
