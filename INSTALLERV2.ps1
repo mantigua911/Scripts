@@ -148,7 +148,7 @@ function Get-RenameAndJoingDomain {
 				$renameComputer = Read-Host -Prompt "Enter the name of the computer" 
 				Write-Host "Please enter the local admin login"
 				Start-Sleep -Seconds 3
-				Rename-Computer -NewName $renameComputer -DomainCredential $credential
+				Rename-Computer -NewName $renameComputer
 				Start-Sleep -Seconds 2
 				Break
 				}
@@ -167,9 +167,9 @@ function Get-RenameAndJoingDomain {
 				Write-Host "Please enter your AD Admin credentials"
 				Start-Sleep -Seconds 2
 				if (Test-IsLaptop){
-					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org"
+					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org" -Credential setp11mm\
 				} else {
-					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Computers,DC=Sept11mm, DC=org"
+					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Computers,DC=Sept11mm, DC=org" -Credential setp11mm\
 				}
 				
 				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
