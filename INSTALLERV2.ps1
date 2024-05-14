@@ -166,10 +166,13 @@ function Get-RenameAndJoingDomain {
 			"Y" {
 				Write-Host "Please enter your AD Admin credentials"
 				Start-Sleep -Seconds 2
+
 				if (Test-IsLaptop){
-					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org" -Credential setp11mm\
+					"This is a laptop"
+					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org" -Credential sept11mm\
 				} else {
-					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Computers,DC=Sept11mm, DC=org" -Credential setp11mm\
+					"This is a desktop"
+					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Computers,DC=Sept11mm, DC=org" -Credential sept11mm\
 				}
 				
 				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
