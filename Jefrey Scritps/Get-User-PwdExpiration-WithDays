@@ -1,0 +1,26 @@
+##Can be used to get user's generic information like along with the date the passwrod was changed and when it will expire, it will also give you the remaining days until it expires.
+
+if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))  
+{  
+  $arguments = "& '" +$myinvocation.mycommand.definition + "'"
+  Start-Process powershell -Verb runAs -ArgumentList $arguments
+  Break
+}
+
+ 
+ $MaxPasswordAge=(Get-ADDefaultDomainPasswordPolicy).MaxPasswordAge 
+ $daysAhead = 7;
+ $dateMin=(get-date).AddDays(-$maxPwdAge);
+ $dateMax=$DateMin.AddDays($daysAhead); 
+
+$Users = 'jdiaz', 'jvalensoy', 'shey', 'jjerome', 'mantigua'| ForEach-Object {  Get-ADUser -Identity $_ -Properties *}
+
+foreach($user in $Users){
+    $Name = "$($user.givenname) $($user.Surname)"
+    $Email =$user.EmailAddress
+    $PasswordSetOn=$user.PasswordLastSet
+    $ExpiryDate=$PasswordSetOn+$MaxPasswordAge
+    $Today=Get-Date
+    $DaysLeft=(New-TimeSpan -Start $Today.Date -End $ExpiryDate.Date).Days
+    Write-Host "Name:" $Name, "Email:" $Email, "Password Last set:" $PasswordSetOn, "Expiration Date:" $ExpiryDate, "Days Left:" $DaysLeft | Format-Table
+    }
