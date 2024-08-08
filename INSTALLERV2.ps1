@@ -220,7 +220,7 @@ function Install-Cisco {
 		Write-host "Renaming current configuration file to configuration_OLD"
 		Rename-Item -Path $filePath -NewName  $newPath
 		
-		Write-Host "Copying the Unrestricted configuration to the Proper location"
+		Write-Host "Copying the Unrestricted configuration to the proper location"
 		Start-Sleep -Seconds 2
 		Copy-item -Path $source -Destination $destination
 
