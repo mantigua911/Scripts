@@ -39,7 +39,7 @@ cd $ScriptPath
 		$iKeyencrypted = Get-Content $pathToScript\iKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
 		$sKeyencrypted = Get-Content $pathToScript\sKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
 		
-		$nameOfApps = "Dell SecureWorks Red Cloak","Mozilla Firefox (x64 en-US)", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer",  "Cisco AnyConnect Network Access Manager",  "Cisco AnyConnect Secure Mobility Client", "Cisco AnyConnect Start Before Login Module", "Adobe Acrobat Reader"
+		$nameOfApps = "Dell SecureWorks Red Cloak","Mozilla Firefox (x64 en-US)", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer", "Adobe Acrobat Reader", "Cisco Secure Client - AnyConnect VPN","Cisco Secure Client - Network Access Manager", "Cisco Secure Client - Start Before Login"
 
 	## Location of the OLD configuration files (Needs to be run after and IF cisco is installed). It finds and rename the old configuration files
 		$filePath = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration.xml"
@@ -64,11 +64,11 @@ cd $ScriptPath
 		Write-Host "THIS IS A LAPTOP"
 
 	} else {
-		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.4.74-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.4.74-nam-predeploy-k9.msi"
+		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.4.74-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.4.74-nam-predeploy-k9.msi", "cisco-secure-client-win-5.1.4.74-sbl-predeploy-k9.msi"
 		$source = "$pathToScript\configuration_desktop.xml"
 		Write-Host "THIS IS A DESKTOP" 
 	}
-	$destination = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\"
+	$destination = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\"
 ## End of Variables ##
 
 ## Decrypt ##
@@ -225,9 +225,9 @@ function Install-Cisco {
 		Copy-item -Path $source -Destination $destination
 
 		if (Test-IsLaptop){
-			Rename-Item -Path "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_Laptop.xml" -NewName  $filePath
+			Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration_Laptop.xml" -NewName  $filePath
 		} else {
-			Rename-Item -Path "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_desktop.xml" -NewName  $filePath
+			Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration_desktop.xml" -NewName  $filePath
 		}
 		
 		Write-Host "Done!"
