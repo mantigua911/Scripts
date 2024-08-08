@@ -59,12 +59,12 @@ cd $ScriptPath
 	}
 
 	if(Test-IsLaptop){
-		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi","anyconnect-win-4.10.07073-gina-predeploy-k9.msi"
+		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.4.74-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.4.74-nam-predeploy-k9.msi","cisco-secure-client-win-5.1.4.74-sbl-predeploy-k9.msi"
 		$source = "$pathToScript\configuration_Laptop.xml"
 		Write-Host "THIS IS A LAPTOP"
 
 	} else {
-		$ciscoNameOfMsi = "anyconnect-win-4.10.07073-core-vpn-predeploy-k9.msi" ,"anyconnect-win-4.10.07073-nam-predeploy-k9.msi"
+		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.4.74-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.4.74-nam-predeploy-k9.msi"
 		$source = "$pathToScript\configuration_desktop.xml"
 		Write-Host "THIS IS A DESKTOP" 
 	}
