@@ -48,7 +48,7 @@ cd $ScriptPath
 		$newPath = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration_OLD.xml"
 
 	## MSI names (THIS CAN BE MODIFIED AND ADD ANY MSI NAMES YOU WOULD LIKE)
-		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "redcloak.msi", "Firefox Setup_133.0.3.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi"
+		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "redcloak.msi", "Firefox Setup_133.0.3.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi", "Webex.msi"
 
 	##Cisco MSI Installations (LAPTOPS AND DESKTOPS)
 	## Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
@@ -67,7 +67,7 @@ cd $ScriptPath
 
 	} else {
 		$ciscoNameOfMsi = "cisco-5.0.05040-core-vpn-predeploy-k9.msi" ,"cisco-5.0.05040-nam-predeploy-k9.msi","cisco-5.0.05040-sbl-predeploy-k9.msi"
-		$source = "$pathToScript\Config_Profile_Laptop\configuration.xml"
+		$source = "$pathToScript\Config_Profile_Desktop\configuration.xml"
 		Write-Host "THIS IS A DESKTOP" 
 	}
 	$destination = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\"
@@ -321,9 +321,10 @@ do {
 			
 		3. Individual Module Install.
 			- Prompts to either: Install Apps (not counting Cisco), 
-			- Install Cisco, Install Windows Updates(optional), 
+			Install Cisco, Install Windows Updates(optional), 
 			Rename(optional) + Add to domain (optional) or
 			- Run SFC+DISM+CHKDSK Scan
+
 		4. Exit.
 						"
 		Start-Sleep -Seconds 2
