@@ -12,8 +12,10 @@
 
 #>											  
 <#
+
 Sets execution policy to Unrestricted for this run only. 
 After the script finishes, it brings it back to how it was before.
+
 #>
 	
 Set-ExecutionPolicy Unrestricted -Scope Process -Confirm:$False 
@@ -39,14 +41,14 @@ cd $ScriptPath
 		$iKeyencrypted = Get-Content $pathToScript\iKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
 		$sKeyencrypted = Get-Content $pathToScript\sKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
 		
-		$nameOfApps = "Dell SecureWorks Red Cloak","Mozilla Firefox (x64 en-US)", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer", "Adobe Acrobat Reader", "Cisco Secure Client - AnyConnect VPN","Cisco Secure Client - Network Access Manager", "Cisco Secure Client - Start Before Login"
+		$nameOfApps = "Dell SecureWorks Red Cloak", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer", "Adobe Acrobat Reader", "Cisco Secure Client - AnyConnect VPN","Cisco Secure Client - Network Access Manager", "Cisco Secure Client - Start Before Login"
 
 	## Location of the OLD configuration files (Needs to be run after and IF cisco is installed). It finds and rename the old configuration files
-		$filePath = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration.xml"
-		$newPath = "C:\ProgramData\Cisco\Cisco AnyConnect Secure Mobility Client\Network Access Manager\system\configuration_OLD.xml"
+		$filePath = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml"
+		$newPath = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration_OLD.xml"
 
 	## MSI names (THIS CAN BE MODIFIED AND ADD ANY MSI NAMES YOU WOULD LIKE)
-		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "redcloak.msi", "Firefox_Setup_115.0.2.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi"
+		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "redcloak.msi", "Firefox Setup_133.0.3.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi"
 
 	##Cisco MSI Installations (LAPTOPS AND DESKTOPS)
 	## Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
@@ -59,13 +61,13 @@ cd $ScriptPath
 	}
 
 	if(Test-IsLaptop){
-		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.4.74-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.4.74-nam-predeploy-k9.msi","cisco-secure-client-win-5.1.4.74-sbl-predeploy-k9.msi"
-		$source = "$pathToScript\configuration_Laptop.xml"
+		$ciscoNameOfMsi = "cisco-5.0.05040-core-vpn-predeploy-k9.msi" ,"cisco-5.0.05040-nam-predeploy-k9.msi","cisco-5.0.05040-sbl-predeploy-k9.msi"
+		$source = "$pathToScript\Config_Profile_Laptop\configuration.xml"
 		Write-Host "THIS IS A LAPTOP"
 
 	} else {
-		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.4.74-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.4.74-nam-predeploy-k9.msi", "cisco-secure-client-win-5.1.4.74-sbl-predeploy-k9.msi"
-		$source = "$pathToScript\configuration_desktop.xml"
+		$ciscoNameOfMsi = "cisco-5.0.05040-core-vpn-predeploy-k9.msi" ,"cisco-5.0.05040-nam-predeploy-k9.msi","cisco-5.0.05040-sbl-predeploy-k9.msi"
+		$source = "$pathToScript\Config_Profile_Laptop\configuration.xml"
 		Write-Host "THIS IS A DESKTOP" 
 	}
 	$destination = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\"
@@ -146,9 +148,10 @@ function Get-RenameAndJoingDomain {
 			"Y" {	
 				Start-Sleep -Seconds 1
 				$renameComputer = Read-Host -Prompt "Enter the name of the computer" 
-				Write-Host "Please enter the local admin login"
+				# Write-Host "Please enter the local admin login"
 				Start-Sleep -Seconds 3
-				Rename-Computer -NewName $renameComputer -LocalCredential $env:COMPUTERNAME\
+				Rename-Computer -NewName $renameComputer 
+				#-LocalCredential $env:COMPUTERNAME\
 				Start-Sleep -Seconds 2
 				Break
 				}
@@ -168,11 +171,9 @@ function Get-RenameAndJoingDomain {
 				Start-Sleep -Seconds 2
 
 				if (Test-IsLaptop){
-					"This is a laptop"
-					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org" -Credential sept11mm\
+					ADD-COMPUTER -DOMAINNAME sept11mm.org -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org" -Credential sept11mm\
 				} else {
-					"This is a desktop"
-					ADD-COMPUTER -DOMAINNAME SEPT11MM.ORG -OUPATH "OU=Computers,DC=Sept11mm, DC=org" -Credential sept11mm\
+					ADD-COMPUTER -DOMAINNAME sept11mm.org -OUPATH "OU=Computers,DC=Sept11mm, DC=org" -Credential sept11mm\
 				}
 				
 				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
@@ -225,9 +226,9 @@ function Install-Cisco {
 		Copy-item -Path $source -Destination $destination
 
 		if (Test-IsLaptop){
-			Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration_Laptop.xml" -NewName  $filePath
+			# Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml" -NewName  $filePath
 		} else {
-			Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration_desktop.xml" -NewName  $filePath
+			# Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml" -NewName  $filePath
 		}
 		
 		Write-Host "Done!"
