@@ -49,7 +49,7 @@ cd $ScriptPath
 
 	## MSI names (THIS CAN BE MODIFIED AND ADD ANY MSI NAMES YOU WOULD LIKE)
 		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "redcloak.msi", "Firefox_Setup_133.0.3.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi", "Webex.msi"
-
+		$ArgumentsList = "/i $msi /qn "
 	##Cisco MSI Installations (LAPTOPS AND DESKTOPS)
 	## Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
 	function Test-IsLaptop {
@@ -101,29 +101,46 @@ Remove-Variable tempCred
 ## End of Decrypt ##
 
 ##Functions##
+
+# Define global variables for script execution.
+$LogFile = "$pathToScript\InstallLog_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+
+# Function to log messages to a file
+function Write-Log {
+    param (
+        [string]$Message,
+        [string]$Level = "INFO"
+    )
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    "$Timestamp [$Level] $Message" | Out-File -Append -FilePath $LogFile
+    Write-Host "$Timestamp [$Level] $Message"
+}
+
 function Install-Apps {
 	 param()
 	# 1. Install Apps (Cisco gets installed last because it drops network connection once installed) 
 
 		Write-Host "Installing apps..."
-		foreach($msi in $nameOfMSI) {
-			Start-Process msiexec -ArgumentList  "/i $msi /qn " -Wait
+			foreach($msi in $nameOfMSI) {
+				Start-Process msiexec -ArgumentList  $ArgumentsList -Wait
+				Start-Sleep -Seconds 5
+				Write-Host "$msi installed"
+	
+				Write-Log "Starting installation of: $msi"
+				Write-Log "Installation completed for: $msi"
+			}
+			## INDIVIDUAL .EXE INSTALLERS (They require a different approach for installment, so I separated them) - MAX
+			Write-Host "Attempting to install Adobe Reader"
+			Start-Sleep -Seconds 2
+			# Adobe # 
+			Start-Process ".\Adobe.exe" -ArgumentList "/sAll /rs EULA_ACCEPT=YES" -Wait
+			Start-Sleep -Seconds 2
+			
+			Write-Host "Attempting to install DUO"
+			Start-Sleep -Seconds 2
+			# DUO #
+			.\duo-win-login-4.2.2.exe /S /V" /qn IKEY="$iKeyDecrypted" SKEY="$sKeyDecrypted" HOST="$APIDecrypted" AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 			Start-Sleep -Seconds 5
-			Write-Host "$msi installed"
-		}
-		## INDIVIDUAL .EXE INSTALLERS (They require a different approach for installment, so I separated them) - MAX
-		Write-Host "Attempting to install Adobe Reader"
-		Start-Sleep -Seconds 2
-		# Adobe # 
-		Start-Process ".\Adobe.exe" -ArgumentList "/sAll /rs EULA_ACCEPT=YES" -Wait
-		Start-Sleep -Seconds 2
-		
-		Write-Host "Attempting to install DUO"
-		Start-Sleep -Seconds 2
-		# DUO #
-		.\duo-win-login-4.2.2.exe /S /V" /qn IKEY="$iKeyDecrypted" SKEY="$sKeyDecrypted" HOST="$APIDecrypted" AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
-		Start-Sleep -Seconds 5
-		
 	## End of Installing Apps ##
  }
  
@@ -225,11 +242,11 @@ function Install-Cisco {
 		Start-Sleep -Seconds 2
 		Copy-item -Path $source -Destination $destination
 
-		if (Test-IsLaptop){
-			# Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml" -NewName  $filePath
-		} else {
-			# Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml" -NewName  $filePath
-		}
+		# if (Test-IsLaptop){
+		# 	# Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml" -NewName  $filePath
+		# } else {
+		# 	# Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml" -NewName  $filePath
+		# }
 		
 		Write-Host "Done!"
 }
@@ -241,16 +258,18 @@ function Verify-Integrity {
 
 	foreach($app in $nameOfApps) {
 
-		$MyApp = Get-WmiObject -Class Win32_Product | Sort-Object Name | Select-Object Name
-		Start-Sleep -Seconds 2
-
-		If ($MyApp -match $app) {
-			Write-Output " $app is installed `n"
-		} else {
-			Write-output "$app is not installed! Please install this manually. `n"
-		}
+	try {
+        # Write-Log "Checking if software is installed: $app"
+        $InstalledSoftware = Get-CimInstance -ClassName Win32_Product | Where-Object { $_.Name -like "*$app*" }
+        return $InstalledSoftware -ne $null
+    } catch {
+        Write-Log "Error while checking software: $app. $_" "ERROR"
+        throw $_
+    }
 		Start-Sleep -Seconds 2
 	}
+	Write-Host "All apps installed succesfully!`n"
+	Start-Sleep -Seconds 2
 
 	Write-Host "
 	Verifying CISCO configuration files.... `n"
@@ -267,7 +286,7 @@ function Verify-Integrity {
 
 		Please do it manually before restarting. `n"
 		}
-	Write-Host "Verification completed! Please review the previous logs `n"
+	Write-Host "Verification completed!`n"
 	Start-Sleep -Seconds 2
 }
 ## END OF BASIC APP VERIFICATION ##
@@ -284,7 +303,7 @@ function Check-Disk {
 
 	DISM /ONLINE /CLEANUP-IMAGE /RESTOREHEALTH /Source:repairSource\install.wim
 
-	echo Y| CHKDSK C: /F /R /X /scan /perf 
+	Write-Output Y| CHKDSK C: /F /R /X /scan /perf 
 }
 
 ## END OF FUNCTIONS## #
