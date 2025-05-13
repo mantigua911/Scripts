@@ -1,11 +1,4 @@
 <#
-	TO-DO FOR VERSION 2.1:
-
-		- HAVE IT AUTO-SELECT MSI'S  (EXCEPT CISCO)
-		- DEVELOP APP VERIFICATION (Currently on Testing phase) (still cant get it to recognize Firefox when its installed)
-		- and thats it so far :)
-		
-		
 	Developed by Maximo Antigua
 	02/13/2024 
 	Feel free to add any modifications
@@ -48,7 +41,7 @@ cd $ScriptPath
 		$newPath = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration_OLD.xml"
 
 	## MSI names (THIS CAN BE MODIFIED AND ADD ANY MSI NAMES YOU WOULD LIKE)
-		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "redcloak.msi", "Firefox_Setup_133.0.3.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi", "Webex.msi"
+		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "Firefox_Setup_133.0.3.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi", "Webex.msi"
 		$ArgumentsList = "/i $msi /qn "
 	##Cisco MSI Installations (LAPTOPS AND DESKTOPS)
 	## Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
@@ -61,14 +54,17 @@ cd $ScriptPath
 	}
 
 	if(Test-IsLaptop){
-		$ciscoNameOfMsi = "cisco-5.0.05040-core-vpn-predeploy-k9.msi" ,"cisco-5.0.05040-nam-predeploy-k9.msi","cisco-5.0.05040-sbl-predeploy-k9.msi"
-		$source = "$pathToScript\Config_Profile_Laptop\configuration.xml"
+		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.7.80-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.7.80-nam-predeploy-k9.msi",
+		"cisco-secure-client-win-5.1.7.80-sbl-predeploy-k9.msi","cisco-secure-client-win-5.1.7.80-umbrella-predeploy-k9.msi"
+		$source = "$pathToScript\Config_profile\configuration.xml"
 		Write-Host "THIS IS A LAPTOP"
 
 	} else {
-		$ciscoNameOfMsi = "cisco-5.0.05040-core-vpn-predeploy-k9.msi" ,"cisco-5.0.05040-nam-predeploy-k9.msi","cisco-5.0.05040-sbl-predeploy-k9.msi"
-		$source = "$pathToScript\Config_Profile_Desktop\configuration.xml"
+		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.7.80-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.7.80-nam-predeploy-k9.msi"
+		,"cisco-secure-client-win-5.1.7.80-umbrella-predeploy-k9.msi"
+		$source = "$pathToScript\Config_profile\configuration.xml"
 		Write-Host "THIS IS A DESKTOP" 
+		$umbrellaPath = "C:\ProgramData\Cisco\Cisco Secure Client\Umbrella"
 	}
 	$destination = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\"
 ## End of Variables ##
@@ -122,23 +118,26 @@ function Install-Apps {
 
 		Write-Host "Installing apps..."
 			foreach($msi in $nameOfMSI) {
+				Write-Log "Starting installation of: $msi"
 				Start-Process msiexec -ArgumentList  $ArgumentsList -Wait
 				Start-Sleep -Seconds 5
 				Write-Host "$msi installed"
 	
-				Write-Log "Starting installation of: $msi"
+				
 				Write-Log "Installation completed for: $msi"
 			}
 			## INDIVIDUAL .EXE INSTALLERS (They require a different approach for installment, so I separated them) - MAX
 			Write-Host "Attempting to install Adobe Reader"
 			Start-Sleep -Seconds 2
 			# Adobe # 
+			Write-Log "Starting installation of: Adobe Reader"
 			Start-Process ".\Adobe.exe" -ArgumentList "/sAll /rs EULA_ACCEPT=YES" -Wait
 			Start-Sleep -Seconds 2
 			
 			Write-Host "Attempting to install DUO"
 			Start-Sleep -Seconds 2
 			# DUO #
+			Write-Log "Starting installation of: DUO"
 			.\duo-win-login-4.2.2.exe /S /V" /qn IKEY="$iKeyDecrypted" SKEY="$sKeyDecrypted" HOST="$APIDecrypted" AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 			Start-Sleep -Seconds 5
 	## End of Installing Apps ##
@@ -168,7 +167,6 @@ function Get-RenameAndJoingDomain {
 				# Write-Host "Please enter the local admin login"
 				Start-Sleep -Seconds 3
 				Rename-Computer -NewName $renameComputer 
-				#-LocalCredential $env:COMPUTERNAME\
 				Start-Sleep -Seconds 2
 				Break
 				}
@@ -187,20 +185,16 @@ function Get-RenameAndJoingDomain {
 				Write-Host "Please enter your AD Admin credentials"
 				Start-Sleep -Seconds 2
 
-				if (Test-IsLaptop){
-					ADD-COMPUTER -DOMAINNAME sept11mm.org -OUPATH "OU=Laptops, OU=Domain Computers,DC=Sept11mm, DC=org" -Credential sept11mm\
-				} else {
-					ADD-COMPUTER -DOMAINNAME sept11mm.org -OUPATH "OU=Computers,DC=Sept11mm, DC=org" -Credential sept11mm\
-				}
+					ADD-COMPUTER -DOMAINNAME sept11mm.org 
 				
-				Write-Host "DONE! ... maybe. Please look in the Laptops Organizational Unit."
+				Write-Host "DONE! ... maybe. Please look in the Computer Organizational Unit."
 				Start-Sleep -Seconds 2
 				Break
 				}
 			default{}
 		}
 		
-	## End of Rename + Join ##
+	## End of Rename + Join Domain ##
 }
  
 function Get-WinUpdates {
@@ -213,10 +207,17 @@ function Get-WinUpdates {
 		
 		if ($ans1 -eq "Y") {
 
-			Install-Package NuGet -confirm:$false -force
-			Install-Module PSwindowsUpdate -Confirm:$false -force
-			import-module PSwindowsUpdate
-			install-WindowsUpdate -AcceptAll -IgnoreReboot
+			if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) 
+			{
+			  Install-PackageProvider -Name NuGet -Force
+			  Install-Module -Name PSWindowsUpdate -Confirm:$false -Force   
+			}
+			
+			# Import PSWindowsUpdate module
+			Import-Module PSWindowsUpdate
+			
+			# Start updating windows without reboot
+			Get-WindowsUpdate -AcceptAll -Install -IgnoreReboot
 
 		} else {
 
@@ -311,14 +312,14 @@ function Check-Disk {
 ## START OF PROGRAM ##
 
 ## Information ##
-
+	Write-Host "-----------------------------------------------------------------" 
 	Write-Host "****Location of the file $PSScriptRoot****"
 	Write-host "****Starting script....****"
 	Start-Sleep -Seconds 3
 	
-	Write-Host "****Welcome to General InstallerV2 by the 9/11 IT Team****"
+	Write-Host "****Welcome to General InstallerV2.5 by the 9/11 IT Team****"
 	Start-Sleep -Seconds 2
-
+	Write-Host "-----------------------------------------------------------------" 
 do {	
 	$returnCode = 0
 	do {
@@ -346,10 +347,12 @@ do {
 
 		4. Exit.
 						"
+	Write-Host "-----------------------------------------------------------------" 
 		Start-Sleep -Seconds 2
-	} while (1, 2, 3, 4 -NotContains $mainAns)
-
-	switch($mainAns){
+		$cleanMainAns = $mainAns -replace " ",""
+	} while (1, 2, 3, 4 -NotContains $cleanMainAns)
+	Write-Host "-----------------------------------------------------------------" 
+	switch($cleanMainAns){
 		1 {
 			Install-Apps;
 			Get-RenameAndJoingDomain;
@@ -390,7 +393,7 @@ do {
 		default {$returnCode = 1;}
 	}
 } while ($returnCode -eq 0)
-
+Write-Host "-----------------------------------------------------------------" 
 $ans = Read-Host -Prompt "Would you like to restart this device?(Y/N)"
 if ($ans.ToUpper() -eq "Y"){
 	Write-Host "Done. The computer will restart 5 seconds after this message."
