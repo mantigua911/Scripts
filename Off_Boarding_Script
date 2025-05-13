@@ -1,0 +1,243 @@
+# Define execution Policy
+Set-ExecutionPolicy RemoteSigned -Force
+
+# --------------------------------------- Values to change -------------------------------
+## Request username
+$decomUser = Read-Host "Username of the target of decommission:"
+# Define user for Off-Boarding
+$userUPN = "$decomUser@domain.com"
+
+# Define user that will have access
+# $Delegate_Access_To = "user2@domain.com" <- Not doing this
+
+# Properties used dynamic groups to change for user
+$UserParams =@{
+    CompanyName = "9/11 Museum & Memorial"
+    OfficeLocation = "N/A"
+    State = "N/A"
+}
+
+# Exclusion group
+# $ExclusionGrp =  "Users Excluded from M365 Backup" <- Not doing this
+
+# -------------------------------- Check modules + Connect -----------------------------
+
+if (!(Get-Module -ListAvailable -Name ExchangeOnlineManagement)) 
+{
+    Write-Host "The ExchangeOnlineManagement module is not installed. Installation in progress..." -ForegroundColor Yellow
+    Install-Module -Name ExchangeOnlineManagement -Force -AllowClobber
+}
+Import-Module ExchangeOnlineManagement 
+
+if (!(Get-Module -ListAvailable -Name Microsoft.Graph)) 
+{
+    Write-Host "The Microsoft.Graph module is not installed. Installation in progress..." -ForegroundColor Yellow
+    Install-Module -Name Microsoft.Graph -Force
+}
+
+if (!(Get-Module -ListAvailable -Name Microsoft.Online.SharePoint.PowerShell)) 
+{
+    Write-Host "The Microsoft.Online.SharePoint.PowerShell module is not installed. Installation in progress..." -ForegroundColor Yellow
+    Install-Module Microsoft.Online.SharePoint.PowerShell -Force
+}
+Import-Module Microsoft.Online.SharePoint.PowerShell -DisableNameChecking
+
+# Connect to Microsoft Graph with required scopes
+Connect-MgGraph -Scopes "User.ReadWrite.All", "Directory.ReadWrite.All", "Directory.AccessAsUser.All", "UserAuthenticationMethod.ReadWrite.All"
+
+# Connect to Exchange Online 
+Connect-ExchangeOnline
+
+# Get Tenant Name
+$tenantName = (Get-MgOrganization).VerifiedDomains | Where-Object { $_.IsInitial -eq $true } | Select-Object -ExpandProperty Name
+$tenantName = $tenantName.Split('.')[0]
+# Generate URL to connect to sharepoint
+$SharePointURL = "https://$tenantName-admin.sharepoint.com"
+# Connect to SharePoint
+Connect-SPOService -Url $SharePointURL 
+
+
+# -------------------------- Get users id  -------------------------------------------
+# Get the user object
+$user = Get-MgUser -UserId $userUPN
+## $UserDelegate = Get-MgUser -UserId $Delegate_Access_To <- Not useing this variable
+
+# -------------------------- Block user Sign-in  -------------------------------------
+
+# Block user Sign-in
+try{
+    Update-MgUser -UserId $user.Id -AccountEnabled:$false
+    Write-Host "User account successfully blocked" -ForegroundColor Green
+}
+catch {
+    Write-Host "Error : Failed to block user account" -ForegroundColor Red
+    Write-Host "Error details: $_"
+}
+
+# -------------------------- Reset Password  -----------------------------------------
+
+# Create Random Password
+Add-Type -AssemblyName System.Security
+$bytes = New-Object 'Byte[]' 16
+[System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+$base64 = [Convert]::ToBase64String($bytes)
+$randomPassword = $base64.Substring(0,16)
+
+# Reset Password
+$params = @{
+    passwordProfile = @{
+        forceChangePasswordNextSignIn = $true
+        password = $randomPassword
+    }
+}
+try{
+    Update-MgUser -UserId $user.Id -BodyParameter $params
+    Write-Host "User Password successfully changed" -ForegroundColor Green
+}
+catch {
+    Write-Host "Error : Failed to change user Password" -ForegroundColor Red
+    Write-Host "Error details: $_"
+}
+
+# -------------------------- Reset User Properties ------------------------------------
+# Remove Properties used in dynamic group membership
+if($user) 
+{
+    try {
+        # Update user Properties
+        Update-MgUser -UserId $user.Id -BodyParameter $UserParams
+        Write-Host "-------------------------------------------------------------------" 
+        Write-Host 'Properties updated successfully for : ' $user.DisplayName -ForegroundColor Green
+    }
+    catch {
+        Write-Host 'Error while updating Properties for : ' $user.DisplayName -ForegroundColor Red
+    }
+
+    try {
+        # Reset Custom Attributes
+        Update-MgUser -UserId $user.Id -AdditionalProperties @{
+        "onPremisesExtensionAttributes" = @{
+            extensionAttribute1 = ""
+            extensionAttribute2 = ""
+            extensionAttribute3 = ""
+            extensionAttribute4 = ""
+            extensionAttribute5 = ""
+            extensionAttribute6 = ""
+            extensionAttribute7 = ""
+            extensionAttribute8 = ""
+            extensionAttribute9 = ""
+            extensionAttribute10 = ""
+            extensionAttribute11 = ""
+            extensionAttribute12 = ""
+            extensionAttribute13 = ""
+            extensionAttribute14 = ""
+            extensionAttribute15 = ""
+            }
+        }
+        Write-Host "-----------------------------------------------------------------" 
+        Write-Host 'custom Attributes updated successfully for : ' $user.DisplayName -ForegroundColor Green
+    }
+    catch {
+        Write-Host 'Error while updating custom Attributes for : ' $user.DisplayName -ForegroundColor Red
+    }
+}
+
+Write-Host "Waiting for updating dynamic Group membership....................." -ForegroundColor Cyan
+Start-Sleep 10
+
+# -------------------------- Remove All Entra id groups membership ------------------
+# Get all user groups (security, M365, mail-enabled, etc.)
+$groups = Get-MgUserMemberOf -UserId $user.Id -All 
+
+$groups | Out-file -FilePath "C:\TEMP\Groups_From_User_$decomUser"
+
+# Loop through each group
+foreach ($group in $groups) {
+    try {
+        # Remove the user from the group
+        Remove-MgGroupMemberByRef -GroupId $group.Id -DirectoryObjectId $user.Id -ErrorAction SilentlyContinue
+        Write-Host "-----------------------------------------------------------------" 
+        Write-Host "Removed $userUPN from group: $($group.AdditionalProperties.displayName)" -ForegroundColor Green
+    }
+    catch {
+        Write-Warning "Cant manage members for Dynamic group : $($group.AdditionalProperties.displayName)" -ForegroundColor Yellow
+    }
+}
+
+# -------------------------- Remove Manger ------------------------------------------
+# Remove user Manger if it exist
+
+if(Get-MgUserManager -UserId $user.Id -ErrorAction SilentlyContinue) {
+    # Remove user Manger
+    Remove-MgUserManagerByRef -UserId $user.Id 
+    Write-Host "--------------------------------------------------------------------" 
+    Write-Host "Manager relationship removed successfully" -ForegroundColor Green
+}
+
+# -------------------------- Delegate OneDrive Site Collection ---------------------
+
+# Get Tenant Name
+$tenantName = (Get-MgOrganization).VerifiedDomains | Where-Object { $_.IsInitial -eq $true } | Select-Object -ExpandProperty Name
+$tenantName = $tenantName.Split('.')[0]
+
+# Get the OneDrive URL for the source user
+# Format is typically: https://tenantname-my.sharepoint.com/personal/username_domain_com
+$oneDriveSiteUrl = "https://$tenantName-my.sharepoint.com/personal/$($user.UserPrincipalName.Replace('@','_').Replace('.','_'))"
+Write-Host "Using OneDrive URL: $oneDriveSiteUrl" -ForegroundColor Cyan #<- Have this output and place somewhere!!
+
+
+# -------------------------- Convert User mailbox to shared mailbox ----------------
+# Convert user mailbox to shared
+Set-Mailbox -Identity $userUPN -Type Shared
+Write-Host "------------------------------------------------------------------------" 
+Write-Host "User Mailbox converted to shred mailbox" -ForegroundColor Green
+
+# -------------------------- Add Auto Reply message --------------------------------
+# Auto Reply message
+$AutoReplyMessage = @"
+Hello, 
+
+Please note that I am no longer with $((Get-MgOrganization).DisplayName).
+
+Regards.
+"@
+
+# Set Auto Reply message
+Set-MailboxAutoReplyConfiguration -Identity $userUPN -AutoReplyState Enabled -InternalMessage $AutoReplyMessage -ExternalMessage $AutoReplyMessage
+Write-Host "------------------------------------------------------------------------" 
+Write-Host "Auto-reply message seccussfully added" -ForegroundColor Green
+
+# -------------------------- Hide contact from Global cathalogue -------------------
+# Hide contact from Global cathalogue
+Set-Mailbox -Identity $userUPN -HiddenFromAddressListsEnabled $true
+Write-Host "------------------------------------------------------------------------" 
+Write-Host "User $($userUPN) seccussfully hided from global cathalogue" -ForegroundColor Green
+
+# -------------------------- Remove All user licences ------------------------------
+#  Remove All user licences
+$SKus = (Get-MgUserLicenseDetail -UserId $user.Id).SkuId
+Set-MgUserLicense -UserId $user.Id -AddLicenses @() -RemoveLicenses ($SKus)
+Write-Host "------------------------------------------------------------------------" 
+Write-Host "User licences seccussfully removed" -ForegroundColor Green
+
+# -------------------------- Generate Email with all details -----------------------
+
+$MessageEN = "Hello, `n`n
+As requested by the HR team, $($user.DisplayName) Office 365 account has been closed. `n `n
+Here's the link to this user's OneDrive files: $($oneDriveSiteUrl) `n
+You have 30 days from today until $((Get-Date).AddDays(60).ToShortDateString()), to move any files or emails you want to keep. `n
+All content (OneDrive and Outlook) will be automatically deleted after this period. `n
+Don't hesitate to contact us if you have any questions at helpdesk@911memorial.org `n`n
+Best, `n
+9/11 IT Helpdesk`n"
+
+write-host $MessageEN -ForegroundColor Yellow
+
+Out-File -FilePath "C:\TEMP\$decomUser.txt"
+
+# -------------------------- Disconnect All sessions -------------------------------
+
+# Disconnect All sessions
+Disconnect-MgGraph
+Disconnect-SPOService
+Disconnect-ExchangeOnline
