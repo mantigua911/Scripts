@@ -11,6 +11,26 @@ After the script finishes, it brings it back to how it was before.
 	
 Set-ExecutionPolicy Unrestricted -Scope Process -Confirm:$False 
 
+# Get user by email from AD
+# %%%%%% Gather Need User Information %%%%%%
+$username = Read-Host -Prompt "Enter the username"
+$userexists = get-ADuser -filter { SamAccountName -eq $username } -ErrorAction SilentlyContinue
+
+
+# ===================================
+# %%%%%% Verify User Existance %%%%%%
+if (!$userexists)
+{
+    Write-Host "Invalid User. Cancelling."
+    return
+}
+
+# =======================================================
+# %%%%%% Verify If The Compromised User Is Correct %%%%%%
+$user_fullname = Get-ADUser -Identity  $username -Properties DisplayName | Select -expand DisplayName
+$userEmail = Get-AdUser -Identity mantigua | Select -Expand UserPrincipalName
+
+
 # Ensure Microsoft Graph SDK is installed
 if (-not (Get-Module -ListAvailable -Name Microsoft.Graph)) {
     Install-Module Microsoft.Graph -Scope CurrentUser -Force
@@ -22,14 +42,11 @@ Import-Module Microsoft.Graph
 Connect-MgGraph 
 
 
-
 Write-Host "-----------------------------------------------------------------" 
 
 # 1. COLLECT DEVICES ASSIGNED TO USER
+
 # Get user by email
-
-$UserEmail = Read-Host -Prompt "Enter user email: "
-
 try {
     $user = Get-MgUser -UserId $UserEmail
 }
