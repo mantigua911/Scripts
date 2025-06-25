@@ -78,6 +78,39 @@ Write-Host "-----------------------------------------------------------------"
 
 # 4. SEND RESTART REQUEST TO DEVICES
 
+# Ensure Microsoft Graph SDK is installed
+if (-not (Get-Module -ListAvailable -Name Microsoft.Graph)) {
+    Install-Module Microsoft.Graph -Scope CurrentUser -Force
+}
+
+Import-Module Microsoft.Graph
+
+# Connect to Microsoft Graph
+Connect-MgGraph -Scopes "DeviceManagementManagedDevices.PrivilegedOperations.All"
+
+# Get  devices with names starting with the stored Device name of user 
+Write-Host "Fetching devices starting with '$devices'..." -ForegroundColor Cyan
+$Devices = Get-MgDeviceManagementManagedDevice -Filter "startswith(deviceName,'JDTEST-DEV')" -All
+
+  # Query installed applications for the device using the beta endpoint
+   $uri = "https://graph.microsoft.com/beta/deviceManagement/managedDevices/$deviceId/restartNow"
+ 
+if ($Devices.Count -eq 0) {
+    Write-Warning "No devices found with name starting with 'VSAG'."
+    return
+}
+
+# Restart each applicable device
+foreach ($Device in $Devices) {
+     try {
+         Restart-MgDeviceManagementManagedDeviceNow -ManagedDeviceId $device.Id
+         Write-Host "Restart command sent to $($Device.DeviceName)"
+     }
+     catch {
+         Write-Warning "Failed to restart $($Device.DeviceName): $_"
+     }}
+    
+
 Write-Host "-----------------------------------------------------------------" 
 
 # 5. RECOVER BITLOCKER KEY
