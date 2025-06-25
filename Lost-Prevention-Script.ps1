@@ -85,6 +85,35 @@ Write-Host "-----------------------------------------------------------------"
 Write-Host "-----------------------------------------------------------------" 
 # 6. EMAIL INFORMATION COLLECTED (DEVICE NAME + ID, USER, DATE SCRIPT RAN, BITLOCKER RECOVERY KEY)
 
+ #Email Body in HTML Format 
+ #Sent to IT
+ $MailTo = "mantigua@911memorial.org"
+
+    $body2 = 
+@"
+    <html>
+    <body>
+    <br>
+    <br>
+    Hi IT,<br>
+    <br>
+    <p>
+    This is an automated message from the National Setptember 11th Memorial & Museum IT Department.<br>
+    The following list of Actions are regarding the Ffollowing user $username.
+    </p>
+    <br>
+    $Report
+    <br>
+    </body>
+    </html>
+"@
+
+#Sends Report email to IT with N COLLECTED information (DEVICE NAME + ID, USER, DATE SCRIPT RAN, BITLOCKER RECOVERY KEY)
+Send-Mailmessage -smtpServer '10.0.62.75' -Port 25 -from 'Automated Reminder <noReply@911memorial.org>' -to $MailTo -subject "Expired Password Accounts" -body $body2 -bodyasHTML -priority High -ErrorAction Stop -ErrorVariable err
+
+
+
+
 Write-Host "-----------------------------------------------------------------" 
 
 Write-Host "Script completed"
