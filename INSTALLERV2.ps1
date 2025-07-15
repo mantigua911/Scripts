@@ -1,8 +1,8 @@
 <#
 	Developed by Maximo Antigua
 	02/13/2024 
-	Feel free to add any modifications
-
+	Feel free to add any modifications after copying the file.
+	Updated 7/15/2025
 #>											  
 <#
 
@@ -33,8 +33,6 @@ cd $ScriptPath
 		$APIencrypted = Get-Content $pathToScript\APIencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
 		$iKeyencrypted = Get-Content $pathToScript\iKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
 		$sKeyencrypted = Get-Content $pathToScript\sKeyencrypted.encrypted |ConvertTo-SecureString -Key $encryptionKey
-		
-		$nameOfApps = "Dell SecureWorks Red Cloak", "Duo Authentication for Windows Logon x64",  "TeamViewer",  "Google Chrome",  "Teams Machine-Wide Installer", "Adobe Acrobat Reader", "Cisco Secure Client - AnyConnect VPN","Cisco Secure Client - Network Access Manager", "Cisco Secure Client - Start Before Login"
 
 	## Location of the OLD configuration files (Needs to be run after and IF cisco is installed). It finds and rename the old configuration files
 		$filePath = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml"
@@ -42,8 +40,11 @@ cd $ScriptPath
 
 	## MSI names (THIS CAN BE MODIFIED AND ADD ANY MSI NAMES YOU WOULD LIKE)
 		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "Firefox_Setup_133.0.3.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi", "Webex.msi"
-		$ArgumentsList = "/i $msi /qn "
-	##Cisco MSI Installations (LAPTOPS AND DESKTOPS)
+		
+	##Cisco Files
+		$UmbrellaFilePath = "$pathToScript\Config_profile\OrgInfo.json"
+		$VPNDisableFilePath = "$pathToScript\Config_profile\VPNDisable_ServiceProfile.xml"
+
 	## Configuration File for Cisco (Needs to be run after and IF cisco is installed). It uses the provided location to move the configuration file in this folder to that location
 	function Test-IsLaptop {
 		$HardwareType = (Get-WmiObject -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
@@ -57,6 +58,7 @@ cd $ScriptPath
 		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.7.80-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.7.80-nam-predeploy-k9.msi",
 		"cisco-secure-client-win-5.1.7.80-sbl-predeploy-k9.msi","cisco-secure-client-win-5.1.7.80-umbrella-predeploy-k9.msi"
 		$source = "$pathToScript\Config_profile\configuration.xml"
+		$umbrellaPath = "C:\ProgramData\Cisco\Cisco Secure Client\Umbrella"
 		Write-Host "THIS IS A LAPTOP"
 
 	} else {
@@ -65,6 +67,7 @@ cd $ScriptPath
 		$source = "$pathToScript\Config_profile\configuration.xml"
 		Write-Host "THIS IS A DESKTOP" 
 		$umbrellaPath = "C:\ProgramData\Cisco\Cisco Secure Client\Umbrella"
+		$DisableVPNPath = "C:\ProgramData\Cisco\Cisco Secure Client\VPN\Profile"
 	}
 	$destination = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\"
 ## End of Variables ##
@@ -118,17 +121,18 @@ function Install-Apps {
 
 		Write-Host "Installing apps..."
 			foreach($msi in $nameOfMSI) {
+
+				$ArgumentsList = "/i $msi /qn "
 				Write-Log "Starting installation of: $msi"
 				Start-Process msiexec -ArgumentList  $ArgumentsList -Wait
 				Start-Sleep -Seconds 5
-				Write-Host "$msi installed"
-	
-				
 				Write-Log "Installation completed for: $msi"
+
 			}
 			## INDIVIDUAL .EXE INSTALLERS (They require a different approach for installment, so I separated them) - MAX
 			Write-Host "Attempting to install Adobe Reader"
 			Start-Sleep -Seconds 2
+
 			# Adobe # 
 			Write-Log "Starting installation of: Adobe Reader"
 			Start-Process ".\Adobe.exe" -ArgumentList "/sAll /rs EULA_ACCEPT=YES" -Wait
@@ -140,6 +144,7 @@ function Install-Apps {
 			Write-Log "Starting installation of: DUO"
 			.\duo-win-login-4.2.2.exe /S /V" /qn IKEY="$iKeyDecrypted" SKEY="$sKeyDecrypted" HOST="$APIDecrypted" AUTOPUSH="#1" FAILOPEN="#0" SMARTCARD="#0" RDPONLY="#0""
 			Start-Sleep -Seconds 5
+
 	## End of Installing Apps ##
  }
  
@@ -239,62 +244,28 @@ function Install-Cisco {
 		Write-host "Renaming current configuration file to configuration_OLD"
 		Rename-Item -Path $filePath -NewName  $newPath
 		
-		Write-Host "Copying the Unrestricted configuration to the proper location"
+		Write-Host "Copying the configuration profile to proper location"
 		Start-Sleep -Seconds 2
 		Copy-item -Path $source -Destination $destination
+		
+		Write-Host "Copying Umbrella file to proper location"
+		Start-Sleep -Seconds 2
+		Copy-item -Path $UmbrellaFilePath -Destination $umbrellaPath
 
-		# if (Test-IsLaptop){
-		# 	# Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml" -NewName  $filePath
-		# } else {
-		# 	# Rename-Item -Path "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml" -NewName  $filePath
-		# }
+		if (!Test-IsLaptop){
+			Write-Host "Copying VPN Disable file to proper location"
+			Start-Sleep -Seconds 2
+			Copy-item -Path $VPNDisableFilePath -Destination $DisableVPNPath
+		}
 		
 		Write-Host "Done!"
 }
 # CISCO + CONFIGURATION FILE COMPLETED #
 
-## BASIC APP VERIFICATION ##
-function Verify-Integrity {
-	param ()
-
-	foreach($app in $nameOfApps) {
-
-	try {
-        # Write-Log "Checking if software is installed: $app"
-        $InstalledSoftware = Get-CimInstance -ClassName Win32_Product | Where-Object { $_.Name -like "*$app*" }
-        return $InstalledSoftware -ne $null
-    } catch {
-        Write-Log "Error while checking software: $app. $_" "ERROR"
-        throw $_
-    }
-		Start-Sleep -Seconds 2
-	}
-	Write-Host "All apps installed succesfully!`n"
-	Start-Sleep -Seconds 2
-
-	Write-Host "
-	Verifying CISCO configuration files.... `n"
-	Start-Sleep -Seconds 1
-
-	if( (Test-Path $newPath) -and (Test-Path $filepath)) {
-		Write-Host "
-		Old configuration was renamed... `n"
-		Start-Sleep -Seconds 2
-		Write-Host "New configuration file was installed properly `n"
-	} else {
-		Write-Host "
-		The configuration files have not been installed for Cisco.
-
-		Please do it manually before restarting. `n"
-		}
-	Write-Host "Verification completed!`n"
-	Start-Sleep -Seconds 2
-}
-## END OF BASIC APP VERIFICATION ##
-
 ## CHK DSK + DISM + SFC ##
 function Check-Disk {
 	param ()
+	Write-Host "-----------------------------------------------------------------" 
 	Write-Host "Starting to verify E: Disk integrity.... `n "
 	SFC /SCANNOW
 
@@ -307,6 +278,17 @@ function Check-Disk {
 	Write-Output Y| CHKDSK C: /F /R /X /scan /perf 
 }
 
+## Install Taegis
+function Taegis {
+	param()
+	Write-Host "-----------------------------------------------------------------" 
+	Write-Host "Starting the installation of Taegis..."
+	Write-Log "Starting installation of: $msi"
+
+	Start-Process ".\Taegis\Invoke-AppDeployToolkit.exe" -Wait
+	
+	Write-Log "Taegis installed."
+}
 ## END OF FUNCTIONS## #
 
 ## START OF PROGRAM ##
@@ -325,26 +307,24 @@ do {
 	do {
 	$mainAns = Read-host -Prompt "
 		Please select your options (single digit integers only):
-		
+		-----------------------------------------------------------------
 		1. Full Install.
 			- Install all the apps(in the folder), 
 			- Renames + Adds to the domain (optional), 
 			- Install Windows Updates(optional), and 
 			- Install Cisco + Configuration Profile.
-			- Verify installations (In testing phase)
 			- Runs SFC+DISM+CHKDSK Scan
-			
+			-----------------------------------------------------------------		
 		2. Express Install.
 			- Install apps and Cisco+Config file. 
 			- No Windows Updates, No Rename+Add to domain.
-			- Verify Installations (In testing phase)
-			
+			-----------------------------------------------------------------	
 		3. Individual Module Install.
 			- Prompts to either: Install Apps (not counting Cisco), 
 			Install Cisco, Install Windows Updates(optional), 
 			Rename(optional) + Add to domain (optional) or
 			- Run SFC+DISM+CHKDSK Scan
-
+			-----------------------------------------------------------------
 		4. Exit.
 						"
 	Write-Host "-----------------------------------------------------------------" 
@@ -358,14 +338,12 @@ do {
 			Get-RenameAndJoingDomain;
 			Get-WinUpdates;
 			Install-Cisco;
-			Verify-Integrity;
 			Check-Disk;
 			Break
 			}
 		2 {
 			Install-Apps;
 			Install-Cisco;
-			Verify-Integrity;
 			Break
 		}
 		3 {do {
@@ -374,19 +352,17 @@ do {
 			2. Install-Cisco
 			3. Install-WindowsUpdates
 			4. Rename + Add to Domain
-			5. Verify Installations
-			6. SFC+DISM+CHKDSK Scan
-			7. Return to Main
+			5. SFC+DISM+CHKDSK Scan
+			6. Return to Main
 				"
 			Start-Sleep -Seconds 2
-		} while (1, 2, 3, 4, 5, 6, 7 -NotContains $innerAnsw)
+		} while (1, 2, 3, 4, 5, 6 -NotContains $innerAnsw)
 			switch($innerAnsw){
 					1 {Install-Apps; Break}
 					2 {Install-Cisco; Break}
 					3 {Get-WinUpdates; Break}
 					4 {Get-RenameAndJoingDomain; Break}
-					5 {Verify-Integrity; Break}
-					6 {Check-Disk; Break}
+					5 {Check-Disk; Break}
 					default {"*blerp*"}
 				}
 			}
