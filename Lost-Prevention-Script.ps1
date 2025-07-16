@@ -133,7 +133,7 @@ Write-Host "-----------------------------------------------------------------"
 "@
 
 #Sends Report email to IT with N COLLECTED information (DEVICE NAME + ID, USER, DATE SCRIPT RAN, BITLOCKER RECOVERY KEY)
-Send-Mailmessage -smtpServer '10.0.62.75' -Port 25 -from 'Automated Reminder <noReply@911memorial.org>' -to $MailTo -subject "Expired Password Accounts" -body $body2 -bodyasHTML -priority High -ErrorAction Stop -ErrorVariable err
+Send-Mailmessage -smtpServer '10.0.62.75' -Port 25 -from 'Automated Reminder <noReply@911memorial.org>' -to $MailTo -subject  "User Devices"  -body $body2 -bodyasHTML -priority High -ErrorAction Stop -ErrorVariable err
 
 
 
