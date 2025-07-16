@@ -311,18 +311,21 @@ do {
 		1. Full Install.
 			- Install all the apps(in the folder), 
 			- Renames + Adds to the domain (optional), 
-			- Install Windows Updates(optional), and 
-			- Install Cisco + Configuration Profile.
+			- Install Windows Updates(optional),  
+			- Install Cisco + Configuration Profile, and
+			- Install Taegis.
 			- Runs SFC+DISM+CHKDSK Scan
 			-----------------------------------------------------------------		
 		2. Express Install.
-			- Install apps and Cisco+Config file. 
+			- Install apps and Cisco+Config file.
+			- Install Taegis.
 			- No Windows Updates, No Rename+Add to domain.
 			-----------------------------------------------------------------	
 		3. Individual Module Install.
 			- Prompts to either: Install Apps (not counting Cisco), 
 			Install Cisco, Install Windows Updates(optional), 
 			Rename(optional) + Add to domain (optional) or
+			- Install Taegis
 			- Run SFC+DISM+CHKDSK Scan
 			-----------------------------------------------------------------
 		4. Exit.
@@ -337,12 +340,14 @@ do {
 			Install-Apps;
 			Get-RenameAndJoingDomain;
 			Get-WinUpdates;
+			Taegis;
 			Install-Cisco;
 			Check-Disk;
 			Break
 			}
 		2 {
 			Install-Apps;
+			Taegis;
 			Install-Cisco;
 			Break
 		}
@@ -353,7 +358,8 @@ do {
 			3. Install-WindowsUpdates
 			4. Rename + Add to Domain
 			5. SFC+DISM+CHKDSK Scan
-			6. Return to Main
+			6. Install Taegis
+			7. Return to Main
 				"
 			Start-Sleep -Seconds 2
 		} while (1, 2, 3, 4, 5, 6 -NotContains $innerAnsw)
@@ -363,6 +369,7 @@ do {
 					3 {Get-WinUpdates; Break}
 					4 {Get-RenameAndJoingDomain; Break}
 					5 {Check-Disk; Break}
+					6 {Taegis; Break}
 					default {"*blerp*"}
 				}
 			}
