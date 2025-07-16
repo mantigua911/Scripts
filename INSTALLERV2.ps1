@@ -252,7 +252,7 @@ function Install-Cisco {
 		Start-Sleep -Seconds 2
 		Copy-item -Path $UmbrellaFilePath -Destination $umbrellaPath
 
-		if (!Test-IsLaptop){
+		if (Test-IsLaptop){
 			Write-Host "Copying VPN Disable file to proper location"
 			Start-Sleep -Seconds 2
 			Copy-item -Path $VPNDisableFilePath -Destination $DisableVPNPath
