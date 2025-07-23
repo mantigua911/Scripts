@@ -72,7 +72,7 @@ cd $ScriptPath
 	$destination = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\"
 ## End of Variables ##
 
-## Decrypt ##
+## Decrypt ## ## IMPORTANT: ONLY TOUCH IF YOU KNOW WHAT YOU ARE DOING, IF YOU WANT TO PLAY AROUND WITH IT PLEASE CREATE A FORK.
 # 1.
 $secure= $APIencrypted
 
@@ -252,21 +252,25 @@ function Install-Cisco {
 		Start-Sleep -Seconds 2
 		Copy-item -Path $UmbrellaFilePath -Destination $umbrellaPath
 
-		if (Test-IsLaptop){
+		##If the device is a desktop, it then installs the VPNDisable file.
+		$value = Test-IsLaptop
+
+		if (!$value){
 			Write-Host "Copying VPN Disable file to proper location"
 			Start-Sleep -Seconds 2
 			Copy-item -Path $VPNDisableFilePath -Destination $DisableVPNPath
-		}
+		} 
 		
 		Write-Host "Done!"
 }
 # CISCO + CONFIGURATION FILE COMPLETED #
 
 ## CHK DSK + DISM + SFC ##
-function Check-Disk {
+function Integrity-Check {
 	param ()
 	Write-Host "-----------------------------------------------------------------" 
 	Write-Host "Starting to verify E: Disk integrity.... `n "
+	Write-Log "Starting to verify E: Disk integrity...."
 	SFC /SCANNOW
 
 	DISM /ONLINE /CLEANUP-IMAGE /CHECKHEALTH 
@@ -275,7 +279,7 @@ function Check-Disk {
 
 	DISM /ONLINE /CLEANUP-IMAGE /RESTOREHEALTH /Source:repairSource\install.wim
 
-	Write-Output Y| CHKDSK C: /F /R /X /scan /perf 
+	Write-Output Y | CHKDSK C: /F /R /X /scan /perf 
 }
 
 ## Install Taegis
@@ -330,7 +334,7 @@ do {
 			-----------------------------------------------------------------
 		4. Exit.
 						"
-	Write-Host "-----------------------------------------------------------------" 
+		Write-Host "-----------------------------------------------------------------" 
 		Start-Sleep -Seconds 2
 		$cleanMainAns = $mainAns -replace " ",""
 	} while (1, 2, 3, 4 -NotContains $cleanMainAns)
@@ -342,7 +346,7 @@ do {
 			Get-WinUpdates;
 			Taegis;
 			Install-Cisco;
-			Check-Disk;
+			Integrity-Check;
 			Break
 			}
 		2 {
@@ -362,13 +366,14 @@ do {
 			7. Return to Main
 				"
 			Start-Sleep -Seconds 2
+			Write-Log "Option $innerAnsw selected."
 		} while (1, 2, 3, 4, 5, 6 -NotContains $innerAnsw)
 			switch($innerAnsw){
 					1 {Install-Apps; Break}
 					2 {Install-Cisco; Break}
 					3 {Get-WinUpdates; Break}
 					4 {Get-RenameAndJoingDomain; Break}
-					5 {Check-Disk; Break}
+					5 {Integrity-Check; Break}
 					6 {Taegis; Break}
 					default {"*blerp*"}
 				}
@@ -381,9 +386,11 @@ $ans = Read-Host -Prompt "Would you like to restart this device?(Y/N)"
 if ($ans.ToUpper() -eq "Y"){
 	Write-Host "Done. The computer will restart 5 seconds after this message."
 	Start-Sleep -Seconds 5
+	Write-Log "Script completed, device restarting."
 	Restart-Computer -Force
 } else {
 	Read-Host "Boooring =("
+	Write-Log "Script completed, PS window closed."
 }
 
 ## END OF PROGRAM ##
