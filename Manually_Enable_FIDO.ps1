@@ -9,7 +9,16 @@ Sets execution policy to Unrestricted for this run only.
 After the script finishes, it brings it back to how it was before.
 
 #>
-	
+
+## Checks if the process is running as admin, if not it opens a new one with admin permissions
+if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))  
+{  
+  $arguments = "& '" +$myinvocation.mycommand.definition + "'"
+  Start-Process powershell -Verb runAs -ArgumentList $arguments
+  Break
+}
+
+
 Set-ExecutionPolicy Unrestricted -Scope Process -Confirm:$False 
 
 ## Modify an existing reg key
@@ -49,3 +58,7 @@ if (Test-Path $regPath) {
 ## Uninstall DUO
 
 Start-Process -FilePath msiexec.exe -ArgumentList @( '/x "{15393052-A362-41DF-969E-638A2A07F7AD}"')
+
+Write-Host "Process Complete."
+
+Read-Host -Prompt "Press Enter to close..."
