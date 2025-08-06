@@ -306,6 +306,26 @@ function Taegis {
 	Write-Host "****Welcome to General InstallerV2.5 by the 9/11 IT Team****"
 	Start-Sleep -Seconds 2
 	Write-Host "-----------------------------------------------------------------" 
+##Checks for local admin account
+# Define the username
+$userName = "memorial_admin"
+
+# Check if the user exists
+$userExists = Get-LocalUser -Name $userName -ErrorAction SilentlyContinue
+
+if ($userExists) {
+    Write-Output "Local admin already created"
+} else {
+    # Create the user with a default password (you should change this securely)
+    $password = ConvertTo-SecureString "911M3m0r1@l!" -AsPlainText -Force
+    New-LocalUser -Name $userName -Password $password -FullName "9/11 Memorial Admin" -Description "Local admin account"
+
+    # Add the user to the Administrators group
+    Add-LocalGroupMember -Group "Administrators" -Member $userName
+
+    Write-Output "Local admin created and added to Administrators group"
+}
+
 do {	
 	$returnCode = 0
 	do {
