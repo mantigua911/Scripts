@@ -294,20 +294,6 @@ function Taegis {
 	Write-Log "Taegis installed."
 }
 ## END OF FUNCTIONS## #
-
-## START OF PROGRAM ##
-
-## Information ##
-	Write-Host "-----------------------------------------------------------------" 
-	Write-Host "****Location of the file $PSScriptRoot****"
-	Write-host "****Starting script....****"
-	Start-Sleep -Seconds 3
-	
-	Write-Host "****Welcome to General InstallerV2.5 by the 9/11 IT Team****"
-	Start-Sleep -Seconds 2
-	Write-Host "-----------------------------------------------------------------" 
-
-	
 ##Checks for local admin account
 # Define the username
 $userName = "memorial_admin"
@@ -327,6 +313,21 @@ if ($userExists) {
 
     Write-Output "Local admin created and added to Administrators group"
 }
+
+
+
+## START OF PROGRAM ##
+
+## Information ##
+	Write-Host "-----------------------------------------------------------------" 
+	Write-Host "****Location of the file $PSScriptRoot****"
+	Write-host "****Starting script....****"
+	Start-Sleep -Seconds 3
+	
+	Write-Host "****Welcome to General InstallerV2.5 by the 9/11 IT Team****"
+	Start-Sleep -Seconds 2
+	Write-Host "-----------------------------------------------------------------" 
+
 
 do {	
 	$returnCode = 0
