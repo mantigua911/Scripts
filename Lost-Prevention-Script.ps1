@@ -1,6 +1,6 @@
 ## Loss prevention script 
 
-## Created by Jefrey & Max from IT
+## Created by Jefrey from IT
 
 <#
 
