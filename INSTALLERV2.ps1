@@ -1,8 +1,8 @@
 <#
-	Developed by Maximo Antigua
+	Developed by Maximo 
 	02/13/2024 
-	Feel free to add any modifications after copying the file.
-	Updated 7/15/2025
+	Feel free to add any modifications ***after*** copying the file.
+
 #>											  
 <#
 
@@ -293,28 +293,37 @@ function Taegis {
 	
 	Write-Log "Taegis installed."
 }
-## END OF FUNCTIONS## #
-##Checks for local admin account
-# Define the username
-$userName = "memorial_admin"
 
-# Check if the user exists
-$userExists = Get-LocalUser -Name $userName -ErrorAction SilentlyContinue
+function Ensure-MemorialAdmin {
+    param (
+        [string]$UserName = "memorial_admin"
+    )
 
-if ($userExists) {
-    Write-Output "Local admin already created"
-} else {
-    # Create the user with a default password (you should change this securely)
-    $password = ConvertTo-SecureString "911M3m0r1@l!" -AsPlainText -Force
-    New-LocalUser -Name $userName -Password $password -FullName "9/11 Memorial Admin" -Description "Local admin account"
+    # Check if the user exists
+    $userExists = Get-LocalUser -Name $UserName -ErrorAction SilentlyContinue
 
-    # Add the user to the Administrators group
-    Add-LocalGroupMember -Group "Administrators" -Member $userName
+    if ($userExists) {
+        Write-Output "Local admin already created"
+    } else {
+        # Prompt for a secure password
+        $password = Read-Host "Enter password for $UserName" -AsSecureString
 
-    Write-Output "Local admin created and added to Administrators group"
+        # Create the user with password policies
+        New-LocalUser -Name $UserName `
+                      -Password $password `
+                      -FullName "Memorial Admin" `
+                      -Description "Local admin account" `
+                      -PasswordNeverExpires $true `
+                      -UserMayNotChangePassword $true
+
+        # Add to Administrators group
+        Add-LocalGroupMember -Group "Administrators" -Member $UserName
+
+        Write-Output "Local admin created and added to Administrators group"
+    }
 }
 
-
+## END OF FUNCTIONS## #
 
 ## START OF PROGRAM ##
 
@@ -336,6 +345,7 @@ do {
 		Please select your options (single digit integers only):
 		-----------------------------------------------------------------
 		1. Full Install.
+			- Creates local Admin
 			- Install all the apps(in the folder), 
 			- Renames + Adds to the domain (optional), 
 			- Install Windows Updates(optional),  
@@ -344,6 +354,7 @@ do {
 			- Runs SFC+DISM+CHKDSK Scan
 			-----------------------------------------------------------------		
 		2. Express Install.
+			- Creates local admin
 			- Install apps and Cisco+Config file.
 			- Install Taegis.
 			- No Windows Updates, No Rename+Add to domain.
@@ -354,6 +365,7 @@ do {
 			Rename(optional) + Add to domain (optional) or
 			- Install Taegis
 			- Run SFC+DISM+CHKDSK Scan
+			- Create local Admin
 			-----------------------------------------------------------------
 		4. Exit.
 						"
@@ -364,8 +376,9 @@ do {
 	Write-Host "-----------------------------------------------------------------" 
 	switch($cleanMainAns){
 		1 {
+			Ensure-MemorialAdmin;
 			Install-Apps;
-			Get-RenameAndJoingDomain;
+			#Get-RenameAndJoingDomain;
 			Get-WinUpdates;
 			Taegis;
 			Install-Cisco;
@@ -373,6 +386,7 @@ do {
 			Break
 			}
 		2 {
+			Ensure-MemorialAdmin;
 			Install-Apps;
 			Taegis;
 			Install-Cisco;
@@ -383,21 +397,23 @@ do {
 			1. Install-apps
 			2. Install-Cisco
 			3. Install-WindowsUpdates
-			4. Rename + Add to Domain
+			4. Rename + Add to Domain -- DISABLED
 			5. SFC+DISM+CHKDSK Scan
 			6. Install Taegis
-			7. Return to Main
+			7. Create local admin
+			8. Return to Main
 				"
 			Start-Sleep -Seconds 2
 			Write-Log "Option $innerAnsw selected."
-		} while (1, 2, 3, 4, 5, 6 -NotContains $innerAnsw)
+		} while (1, 2, 3, 4, 5, 6, 7 -NotContains $innerAnsw)
 			switch($innerAnsw){
 					1 {Install-Apps; Break}
 					2 {Install-Cisco; Break}
 					3 {Get-WinUpdates; Break}
-					4 {Get-RenameAndJoingDomain; Break}
+					# 4 {Get-RenameAndJoingDomain; Break}
 					5 {Integrity-Check; Break}
 					6 {Taegis; Break}
+					7 {Ensure-MemorialAdmin; Break}
 					default {"*blerp*"}
 				}
 			}
