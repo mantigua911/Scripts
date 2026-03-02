@@ -37,7 +37,7 @@ cd $ScriptPath
 	## Location of the OLD configuration files (Needs to be run after and IF cisco is installed). It finds and rename the old configuration files
 		$filePath = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml"
 		$newPath = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration_OLD.xml"
-
+		$umbrellaPath = "C:\ProgramData\Cisco\Cisco Secure Client\Umbrella\"
 	## MSI names (THIS CAN BE MODIFIED AND ADD ANY MSI NAMES YOU WOULD LIKE)
 		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "Firefox_Setup_133.0.3.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi", "Webex.msi"
 		
@@ -58,7 +58,6 @@ cd $ScriptPath
 		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.7.80-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.7.80-nam-predeploy-k9.msi",
 		"cisco-secure-client-win-5.1.7.80-sbl-predeploy-k9.msi","cisco-secure-client-win-5.1.7.80-umbrella-predeploy-k9.msi"
 		$source = "$pathToScript\Config_profile\configuration.xml"
-		$umbrellaPath = "C:\ProgramData\Cisco\Cisco Secure Client\Umbrella"
 		Write-Host "THIS IS A LAPTOP"
 
 	} else {
@@ -66,7 +65,6 @@ cd $ScriptPath
 		,"cisco-secure-client-win-5.1.7.80-umbrella-predeploy-k9.msi"
 		$source = "$pathToScript\Config_profile\configuration.xml"
 		Write-Host "THIS IS A DESKTOP" 
-		$umbrellaPath = "C:\ProgramData\Cisco\Cisco Secure Client\Umbrella"
 		$DisableVPNPath = "C:\ProgramData\Cisco\Cisco Secure Client\VPN\Profile"
 	}
 	$destination = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\"
@@ -280,6 +278,8 @@ function Integrity-Check {
 	DISM /ONLINE /CLEANUP-IMAGE /RESTOREHEALTH /Source:repairSource\install.wim
 
 	Write-Output Y | CHKDSK C: /F /R /X /scan /perf 
+
+	Write-Output Y | winget upgrade --all
 }
 
 ## Install Taegis
@@ -345,13 +345,13 @@ do {
 		Please select your options (single digit integers only):
 		-----------------------------------------------------------------
 		1. Full Install.
-			- Creates local Admin
+			- Creates(or checks for) local Admin 
 			- Install all the apps(in the folder), 
 			- Renames + Adds to the domain (optional), 
 			- Install Windows Updates(optional),  
 			- Install Cisco + Configuration Profile, and
 			- Install Taegis.
-			- Runs SFC+DISM+CHKDSK Scan
+			- Runs SFC+DISM+CHKDSK Scan + winget Updates
 			-----------------------------------------------------------------		
 		2. Express Install.
 			- Creates local admin
