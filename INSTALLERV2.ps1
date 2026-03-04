@@ -279,7 +279,8 @@ function Integrity-Check {
 
 	Write-Output Y | CHKDSK C: /F /R /X /scan /perf 
 
-	Write-Output Y | winget upgrade --all
+	Install-Module -Name Microsoft.WinGet.Client
+	Get-WinGetPackage | Where-Object { $_.IsUpdateAvailable } | Update-WinGetPackage
 }
 
 ## Install Taegis
