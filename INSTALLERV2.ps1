@@ -37,7 +37,7 @@ cd $ScriptPath
 	## Location of the OLD configuration files (Needs to be run after and IF cisco is installed). It finds and rename the old configuration files
 		$filePath = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration.xml"
 		$newPath = "C:\ProgramData\Cisco\Cisco Secure Client\Network Access Manager\system\configuration_OLD.xml"
-		$umbrellaPath = "C:\ProgramData\Cisco\Cisco Secure Client\Umbrella\"
+		$umbrellaPath = "C:\ProgramData\Cisco\Cisco Secure Client\Umbrella"
 	## MSI names (THIS CAN BE MODIFIED AND ADD ANY MSI NAMES YOU WOULD LIKE)
 		$nameOfMSI = "googlechromestandaloneenterprise64.msi", "Firefox_Setup_133.0.3.msi", "TeamViewer_Host.msi", "Teams_windows_x64.msi", "Webex.msi"
 		
@@ -234,7 +234,7 @@ function Install-Cisco {
 	# 4. Install Cisco Anyconnect + Move configuration file to folder
 
 		foreach($msi in $ciscoNameOfMsi) {
-			Start-Process msiexec -ArgumentList  "/i $msi /qn /norestart" -Wait
+			Start-Process msiexec -ArgumentList  "/i $msi /norestart" -Wait
 			Start-Sleep -Seconds 3
 			Write-Host "$msi installed"
 		}
