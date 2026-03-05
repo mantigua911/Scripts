@@ -234,7 +234,7 @@ function Install-Cisco {
 	# 4. Install Cisco Anyconnect + Move configuration file to folder
 
 		foreach($msi in $ciscoNameOfMsi) {
-			Start-Process msiexec -ArgumentList  "/i $msi /norestart" -Wait
+			Start-Process msiexec -ArgumentList  "/i $msi /qn /norestart" -Wait
 			Start-Sleep -Seconds 3
 			Write-Host "$msi installed"
 		}
