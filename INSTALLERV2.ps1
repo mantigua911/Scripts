@@ -55,14 +55,14 @@ cd $ScriptPath
 	}
 
 	if(Test-IsLaptop){
-		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.7.80-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.7.80-nam-predeploy-k9.msi",
-		"cisco-secure-client-win-5.1.7.80-sbl-predeploy-k9.msi","cisco-secure-client-win-5.1.7.80-umbrella-predeploy-k9.msi"
+		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.7.80-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.7.80-umbrella-predeploy-k9.msi","cisco-secure-client-win-5.1.7.80-nam-predeploy-k9.msi",
+		"cisco-secure-client-win-5.1.7.80-sbl-predeploy-k9.msi"
 		$source = "$pathToScript\Config_profile\configuration.xml"
 		Write-Host "THIS IS A LAPTOP"
 
 	} else {
-		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.7.80-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.7.80-nam-predeploy-k9.msi"
-		,"cisco-secure-client-win-5.1.7.80-umbrella-predeploy-k9.msi"
+		$ciscoNameOfMsi = "cisco-secure-client-win-5.1.7.80-core-vpn-predeploy-k9.msi" ,"cisco-secure-client-win-5.1.7.80-umbrella-predeploy-k9.msi","cisco-secure-client-win-5.1.7.80-nam-predeploy-k9.msi"
+	
 		$source = "$pathToScript\Config_profile\configuration.xml"
 		Write-Host "THIS IS A DESKTOP" 
 		$DisableVPNPath = "C:\ProgramData\Cisco\Cisco Secure Client\VPN\Profile"
